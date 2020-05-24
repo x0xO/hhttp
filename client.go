@@ -39,6 +39,7 @@ func NewClient() *Client {
 			DualStack: true,
 		}).DialContext,
 		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   100, // http://tleyden.github.io/blog/2016/11/21/tuning-the-go-http-client-library-for-load-testing/
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
