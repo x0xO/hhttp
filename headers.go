@@ -39,3 +39,7 @@ func (h headers) Contains(header string, patterns interface{}) bool {
 func (h headers) Values(key string) []string {
 	return textproto.MIMEHeader(h).Values(key)
 }
+
+func (h headers) Get(key string) string {
+	return textproto.MIMEHeader(h).Get(key)
+}

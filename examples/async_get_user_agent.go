@@ -26,10 +26,11 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	var get Get
+
 	go func() {
 		defer wg.Done()
 		for job := range jobs {
-			var get Get
 			job.JSON(&get)
 			fmt.Println(get.Headers.UserAgent)
 		}
