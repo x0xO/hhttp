@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"golang.org/x/net/html/charset"
-	"golang.org/x/text/transform"
 )
 
 type body []byte
@@ -29,12 +28,25 @@ func (b body) Contains(pattern interface{}) bool {
 	}
 }
 
-func (b body) UTF8() body {
-	e, _, _ := charset.DetermineEncoding(b, "")
-	bodyUTF8, err := ioutil.ReadAll(transform.NewReader(bytes.NewReader(b), e.NewDecoder()))
+func (b body) UTF8(responseHeaders ...interface{}) body {
+	var contentType string
+
+	if len(responseHeaders) != 0 {
+		switch responseHeaders[0].(type) {
+		case headers:
+			contentType = responseHeaders[0].(headers).Get("Content-Type")
+		}
+	}
+
+	utf8Reader, err := charset.NewReader(bytes.NewReader(b), contentType)
 	if err != nil {
 		return b
 	}
 
-	return bodyUTF8
+	utf8Body, err := ioutil.ReadAll(utf8Reader)
+	if err != nil {
+		return b
+	}
+
+	return utf8Body
 }
