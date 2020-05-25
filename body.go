@@ -1,7 +1,6 @@
 package hhttp
 
 import (
-	"bufio"
 	"bytes"
 	"io/ioutil"
 	"regexp"
@@ -31,12 +30,7 @@ func (b body) Contains(pattern interface{}) bool {
 }
 
 func (b body) UTF8() body {
-	peek, err := bufio.NewReader(bytes.NewReader(b)).Peek(1024)
-	if err != nil {
-		return b
-	}
-
-	e, _, _ := charset.DetermineEncoding(peek, "")
+	e, _, _ := charset.DetermineEncoding(b, "")
 	bodyUTF8, err := ioutil.ReadAll(transform.NewReader(bytes.NewReader(b), e.NewDecoder()))
 	if err != nil {
 		return b
