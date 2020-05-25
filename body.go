@@ -35,8 +35,6 @@ func (b body) UTF8(data ...interface{}) body {
 		switch data[0].(type) {
 		case headers:
 			contentType = data[0].(headers).Get("Content-Type")
-		case string:
-			contentType = strings.ToLower(data[0].(string))
 		}
 	}
 
