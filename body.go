@@ -28,13 +28,15 @@ func (b body) Contains(pattern interface{}) bool {
 	}
 }
 
-func (b body) UTF8(responseHeaders ...interface{}) body {
+func (b body) UTF8(data ...interface{}) body {
 	var contentType string
 
-	if len(responseHeaders) != 0 {
-		switch responseHeaders[0].(type) {
+	if len(data) != 0 {
+		switch data[0].(type) {
 		case headers:
-			contentType = responseHeaders[0].(headers).Get("Content-Type")
+			contentType = data[0].(headers).Get("Content-Type")
+		case string:
+			contentType = strings.ToLower(data[0].(string))
 		}
 	}
 
