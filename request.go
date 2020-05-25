@@ -15,7 +15,7 @@ import (
 
 type Request struct {
 	request *http.Request
-	client  *Client
+	client  *client
 	error   error
 }
 

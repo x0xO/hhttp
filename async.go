@@ -3,7 +3,7 @@ package hhttp
 import "context"
 
 type async struct {
-	client *Client
+	client *client
 	ctx    context.Context
 }
 

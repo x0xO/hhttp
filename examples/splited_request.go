@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/x0xO/hhttp"
 )
@@ -13,10 +12,7 @@ func main() {
 	cli := hhttp.NewClient()
 	req := cli.Get(URL)
 
-	resp, err := req.Do()
-	if err != nil {
-		log.Fatal(err)
-	}
+	resp, _ := req.Do()
 
 	fmt.Println(resp.StatusCode)
 	fmt.Println(resp.Body)

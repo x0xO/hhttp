@@ -11,7 +11,6 @@ func main() {
 	fmt.Println(r.Body)
 
 	r, _ = hhttp.NewClient().Get("http://vk.com").Do()
-
 	fmt.Println(r.Body.UTF8())          // by body
 	fmt.Println(r.Body.UTF8(r.Headers)) // by headers and body if charset not not found in headers
 }

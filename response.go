@@ -14,7 +14,7 @@ import (
 
 type Response struct {
 	Body          body
-	Session       *Client
+	Session       *client
 	ContentLength int64
 	Cookies       cookies
 	Headers       headers
