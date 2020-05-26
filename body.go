@@ -33,6 +33,8 @@ func (b body) UTF8(data ...interface{}) body {
 
 	if len(data) != 0 {
 		switch data[0].(type) {
+		case string:
+			contentType = "text/html; charset=" + data[0].(string)
 		case headers:
 			contentType = data[0].(headers).Get("Content-Type")
 		}
