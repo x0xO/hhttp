@@ -1,5 +1,3 @@
-// https://github.com/artyom/dot/blob/master/dot.go
-
 package main
 
 import (
