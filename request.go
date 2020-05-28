@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -93,14 +92,10 @@ func (req *Request) AddHeaders(headers map[string]string) *Request {
 }
 
 func (req *Request) acceptOptions() error {
-	proxy := os.Getenv("HTTP_PROXY")
 	userAgent := defaultUserAgent
+	req.client.transport.Proxy = http.ProxyFromEnvironment
 
 	if req.client.opt != nil {
-
-		if req.client.opt.Timeout != 0 {
-			req.client.cli.Timeout = time.Second * req.client.opt.Timeout
-		}
 
 		if req.client.opt.BasicAuth != nil && req.request.Header.Get("Authorization") == "" {
 			err := req.basicAuth()
@@ -119,17 +114,19 @@ func (req *Request) acceptOptions() error {
 		}
 
 		if req.client.opt.Proxy != nil {
+			var proxy string
+
 			switch req.client.opt.Proxy.(type) {
 			case string:
 				proxy = req.client.opt.Proxy.(string)
 			case []string:
 				proxy = req.client.opt.Proxy.([]string)[rand.Intn(len(req.client.opt.Proxy.([]string)))]
 			}
-		}
-	}
 
-	if proxyURL, err := url.Parse(proxy); err == nil && proxyURL.Scheme != "" {
-		req.client.transport.Proxy = http.ProxyURL(proxyURL)
+			if proxyURL, err := url.Parse(proxy); err == nil && proxyURL.Scheme != "" {
+				req.client.transport.Proxy = http.ProxyURL(proxyURL)
+			}
+		}
 	}
 
 	req.request.Header.Set("User-Agent", userAgent)

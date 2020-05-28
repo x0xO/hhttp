@@ -2,6 +2,7 @@ package hhttp
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
@@ -21,23 +22,26 @@ import (
 )
 
 type client struct {
-	cli       *http.Client
-	opt       *Options
-	history   history
-	transport *http.Transport
 	Async     *async
+	cli       *http.Client
+	dialer    *net.Dialer
+	history   history
+	opt       *Options
+	transport *http.Transport
 }
 
 func NewClient() *client {
 	c := client{Async: &async{}}
 	c.Async.client = &c
 
+	c.dialer = &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+		DualStack: true,
+	}
+
 	c.transport = &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
+		DialContext:           c.dialer.DialContext,
 		MaxIdleConns:          100,
 		MaxIdleConnsPerHost:   100, // http://tleyden.github.io/blog/2016/11/21/tuning-the-go-http-client-library-for-load-testing/
 		IdleConnTimeout:       90 * time.Second,
@@ -63,6 +67,26 @@ func (c *client) SetOptions(opt *Options) *client {
 	maxRedirects := defaultRedirects
 	if c.opt.MaxRedirect != 0 {
 		maxRedirects = c.opt.MaxRedirect
+	}
+
+	if c.opt.DNS != "" {
+		c.dialer.Resolver = &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				var dialer net.Dialer
+				return dialer.DialContext(ctx, "udp", c.opt.DNS)
+			},
+		}
+	}
+
+	if c.opt.IP != "" {
+		if ip, err := net.ResolveTCPAddr("tcp", c.opt.IP+":0"); err == nil {
+			c.dialer.LocalAddr = ip
+		}
+	}
+
+	if c.opt.Timeout != 0 {
+		c.opt.Timeout = time.Second * c.opt.Timeout
 	}
 
 	redirectPolicy := func(req *http.Request, via []*http.Request) error {

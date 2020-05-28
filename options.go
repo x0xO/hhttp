@@ -11,4 +11,6 @@ type Options struct {
 	Proxy       interface{}
 	Timeout     time.Duration
 	UserAgent   interface{}
+	IP          string
+	DNS         string
 }
