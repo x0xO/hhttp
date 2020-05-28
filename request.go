@@ -18,10 +18,6 @@ type Request struct {
 	error   error
 }
 
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-}
-
 func (req *Request) Do() (*Response, error) {
 	if req.error != nil {
 		return nil, req.error
