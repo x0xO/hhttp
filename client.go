@@ -69,7 +69,7 @@ func (c *client) SetOptions(opt *Options) *client {
 		maxRedirects = c.opt.MaxRedirect
 	}
 
-	if c.opt.DNS != "" {
+	if c.opt.DNS != "" && c.opt.DNSoverTLS == nil {
 		c.dialer.Resolver = &net.Resolver{
 			PreferGo: true,
 			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
@@ -77,6 +77,10 @@ func (c *client) SetOptions(opt *Options) *client {
 				return dialer.DialContext(ctx, "udp", c.opt.DNS)
 			},
 		}
+	}
+
+	if c.opt.DNSoverTLS != nil && c.opt.DNSoverTLS.dnsResolver != nil {
+		c.dialer.Resolver = c.opt.DNSoverTLS.dnsResolver
 	}
 
 	if c.opt.IP != "" {
