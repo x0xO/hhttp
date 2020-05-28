@@ -13,6 +13,5 @@ type Options struct {
 	UserAgent   interface{}
 	IP          string
 	DNS         string
-	// DNSoverTLS  *dnsResolver
 	DNSoverTLS  *dnsOverTLS
 }
