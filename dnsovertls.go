@@ -9,54 +9,42 @@ import (
 )
 
 type dnsOverTLS struct {
-	dns         string
-	addrs       []string
 	dnsResolver *net.Resolver
 }
 
-func DNSoverTLS() *dnsOverTLS {
-	return &dnsOverTLS{}
-}
+func DNSoverTLS() *dnsOverTLS { return &dnsOverTLS{} }
 
 func (dot *dnsOverTLS) Google() *dnsOverTLS {
-	dot.dns = "dns.google"
-	dot.addrs = []string{"8.8.8.8:853", "8.8.4.4:853"}
-	dot.dnsResolver = dot.resolver()
+	dot.dnsResolver = dot.resolver("dns.google", "8.8.8.8:853", "8.8.4.4:853")
 	return dot
 }
 
 func (dot *dnsOverTLS) Cloudflare() *dnsOverTLS {
-	dot.dns = "cloudflare-dns.com"
-	dot.addrs = []string{"1.1.1.1:853", "1.0.0.1:853"}
-	dot.dnsResolver = dot.resolver()
+	dot.dnsResolver = dot.resolver("cloudflare-dns.com", "1.1.1.1:853", "1.0.0.1:853")
 	return dot
 }
 
 func (dot *dnsOverTLS) Libredns() *dnsOverTLS {
-	dot.dns = "dot.libredns.gr"
-	dot.addrs = []string{"116.202.176.26:853"}
-	dot.dnsResolver = dot.resolver()
+	dot.dnsResolver = dot.resolver("dot.libredns.gr", "116.202.176.26:853")
 	return dot
 }
 
 func (dot *dnsOverTLS) Quad9() *dnsOverTLS {
-	dot.dns = "dns.quad9.net"
-	dot.addrs = []string{"9.9.9.9:853", "149.112.112.112:853"}
-	dot.dnsResolver = dot.resolver()
+	dot.dnsResolver = dot.resolver("dns.quad9.net", "9.9.9.9:853", "149.112.112.112:853")
 	return dot
 }
 
-func (dot dnsOverTLS) resolver() *net.Resolver {
+func (dot dnsOverTLS) resolver(serverName string, addresses ...string) *net.Resolver {
 	return &net.Resolver{
 		PreferGo: true,
-		Dial:     dial(dot.dns, dot.addrs...),
+		Dial:     dial(serverName, addresses...),
 	}
 }
 
-func dial(serverName string, addrs ...string) func(context.Context, string, string) (net.Conn, error) {
+func dial(serverName string, addresses ...string) func(context.Context, string, string) (net.Conn, error) {
 	return func(ctx context.Context, network, address string) (net.Conn, error) {
 		var dialer net.Dialer
-		conn, err := dialer.DialContext(ctx, "tcp", addrs[rand.Intn(len(addrs))])
+		conn, err := dialer.DialContext(ctx, "tcp", addresses[rand.Intn(len(addresses))])
 		if err != nil {
 			return nil, err
 		}
