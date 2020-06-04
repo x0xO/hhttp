@@ -14,7 +14,7 @@ import (
 
 type Request struct {
 	request *http.Request
-	client  *client
+	client  *Client
 	error   error
 }
 
@@ -52,8 +52,8 @@ func (req *Request) Do() (*Response, error) {
 	}
 
 	return &Response{
+		Client:        req.client,
 		Body:          body,
-		Session:       req.client,
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),

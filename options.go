@@ -5,6 +5,7 @@ import (
 )
 
 type Options struct {
+	Session     bool
 	BasicAuth   interface{}
 	History     bool
 	MaxRedirect int

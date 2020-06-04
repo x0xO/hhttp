@@ -14,6 +14,8 @@ func main() {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	// ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+
 	defer cancel()
 
 	// with context and pool worker, limit to 20 requests

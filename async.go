@@ -1,9 +1,11 @@
 package hhttp
 
-import "context"
+import (
+	"context"
+)
 
 type async struct {
-	client *client
+	client *Client
 	ctx    context.Context
 }
 

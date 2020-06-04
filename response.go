@@ -13,8 +13,8 @@ import (
 )
 
 type Response struct {
+	*Client
 	Body          body
-	Session       *client
 	ContentLength int64
 	Cookies       cookies
 	Headers       headers
@@ -32,11 +32,11 @@ func (resp Response) Referer() string {
 }
 
 func (resp Response) GetCookies(URL string) []*http.Cookie {
-	return resp.Session.getCookies(URL)
+	return resp.getCookies(URL)
 }
 
 func (resp *Response) SetCookie(URL string, cookies []*http.Cookie) error {
-	return resp.Session.setCookies(URL, cookies)
+	return resp.setCookies(URL, cookies)
 }
 
 func (resp Response) Dump(filename string) error {
@@ -60,7 +60,7 @@ func (resp Response) Debug(verbos ...bool) {
 	fmt.Println("========= Request ==========")
 	fmt.Println(strings.TrimSpace(string(body)))
 
-	cookies := resp.Session.getCookies(resp.request.URL.String())
+	cookies := resp.getCookies(resp.request.URL.String())
 	if len(cookies) != 0 {
 		fmt.Println("\nCookies:")
 		for _, cookie := range cookies {

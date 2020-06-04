@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-type client struct {
+type Client struct {
 	Async     *async
 	cli       *http.Client
 	dialer    *net.Dialer
@@ -30,8 +30,8 @@ type client struct {
 	transport *http.Transport
 }
 
-func NewClient() *client {
-	c := client{Async: &async{}}
+func NewClient() *Client {
+	c := Client{Async: &async{}}
 	c.Async.client = &c
 
 	c.dialer = &net.Dialer{
@@ -50,10 +50,7 @@ func NewClient() *client {
 		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
 	}
 
-	cookieJar, _ := cookiejar.New(nil)
-
 	c.cli = &http.Client{
-		Jar:       cookieJar,
 		Transport: c.transport,
 		Timeout:   time.Second * 180,
 	}
@@ -61,8 +58,12 @@ func NewClient() *client {
 	return &c
 }
 
-func (c *client) SetOptions(opt *Options) *client {
+func (c *Client) SetOptions(opt *Options) *Client {
 	c.opt = opt
+
+	if c.opt.Session {
+		c.cli.Jar, _ = cookiejar.New(nil)
+	}
 
 	maxRedirects := defaultRedirects
 	if c.opt.MaxRedirect != 0 {
@@ -107,41 +108,41 @@ func (c *client) SetOptions(opt *Options) *client {
 	return c
 }
 
-func (c *client) Get(URL string, data ...interface{}) *Request {
+func (c *Client) Get(URL string, data ...interface{}) *Request {
 	if len(data) != 0 {
 		return c.buildRequest(URL, http.MethodGet, data[0])
 	}
 	return c.buildRequest(URL, http.MethodGet, nil)
 }
 
-func (c *client) Delete(URL string, data ...interface{}) *Request {
+func (c *Client) Delete(URL string, data ...interface{}) *Request {
 	if len(data) != 0 {
 		return c.buildRequest(URL, http.MethodDelete, data[0])
 	}
 	return c.buildRequest(URL, http.MethodDelete, nil)
 }
 
-func (c *client) Head(URL string) *Request {
+func (c *Client) Head(URL string) *Request {
 	return c.buildRequest(URL, http.MethodHead, nil)
 }
 
-func (c *client) Post(URL string, data interface{}) *Request {
+func (c *Client) Post(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPost, data)
 }
 
-func (c *client) PostJSON(URL string, data interface{}) *Request {
+func (c *Client) PostJSON(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPost, data)
 }
 
-func (c *client) Put(URL string, data interface{}) *Request {
+func (c *Client) Put(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPut, data)
 }
 
-func (c *client) PutJSON(URL string, data interface{}) *Request {
+func (c *Client) PutJSON(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPut, data)
 }
 
-func (c *client) PostFile(URL, fieldName, filePath string, data ...interface{}) *Request {
+func (c *Client) PostFile(URL, fieldName, filePath string, data ...interface{}) *Request {
 	URL = c.urlFormater(URL)
 
 	var (
@@ -198,7 +199,7 @@ func (c *client) PostFile(URL, fieldName, filePath string, data ...interface{}) 
 	return &Request{request: req, client: c}
 }
 
-func (c client) getCookies(URL string) []*http.Cookie {
+func (c Client) getCookies(URL string) []*http.Cookie {
 	if c.cli.Jar == nil {
 		return nil
 	}
@@ -211,7 +212,7 @@ func (c client) getCookies(URL string) []*http.Cookie {
 	return c.cli.Jar.Cookies(parsedURL)
 }
 
-func (c *client) setCookies(URL string, cookies []*http.Cookie) error {
+func (c *Client) setCookies(URL string, cookies []*http.Cookie) error {
 	if c.cli.Jar == nil {
 		return errors.New("cookie jar is not available")
 	}
@@ -226,7 +227,7 @@ func (c *client) setCookies(URL string, cookies []*http.Cookie) error {
 	return nil
 }
 
-func (c *client) buildRequest(URL, methodType string, data interface{}) *Request {
+func (c *Client) buildRequest(URL, methodType string, data interface{}) *Request {
 	URL = c.urlFormater(URL)
 
 	body, contentType, err := c.buildBody(data)
@@ -246,7 +247,7 @@ func (c *client) buildRequest(URL, methodType string, data interface{}) *Request
 	return &Request{request: req, client: c}
 }
 
-func (c *client) buildBody(data interface{}) (io.Reader, string, error) {
+func (c *Client) buildBody(data interface{}) (io.Reader, string, error) {
 	var reader io.Reader
 	var contentType string
 
@@ -304,7 +305,7 @@ func (c *client) buildBody(data interface{}) (io.Reader, string, error) {
 	return reader, contentType, nil
 }
 
-func (c *client) urlFormater(URL string) string {
+func (c *Client) urlFormater(URL string) string {
 	URL = strings.Trim(URL, ".")
 	if !strings.HasPrefix(URL, "http://") && !strings.HasPrefix(URL, "https://") {
 		URL = "http://" + URL
@@ -313,7 +314,7 @@ func (c *client) urlFormater(URL string) string {
 	return URL
 }
 
-func (c client) detectDataType(data interface{}) string {
+func (c Client) detectDataType(data interface{}) string {
 	value := reflect.ValueOf(data)
 	for i := 0; i < value.Type().NumField(); i++ {
 		if _, ok := value.Type().Field(i).Tag.Lookup("json"); ok {
