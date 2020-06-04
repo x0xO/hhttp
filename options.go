@@ -5,14 +5,14 @@ import (
 )
 
 type Options struct {
-	Session     bool
 	BasicAuth   interface{}
-	History     bool
-	MaxRedirect int
-	Proxy       interface{}
-	Timeout     time.Duration
-	UserAgent   interface{}
-	IP          string
 	DNS         string
 	DNSoverTLS  *dnsOverTLS
+	History     bool
+	IP          string
+	MaxRedirect int
+	Proxy       interface{}
+	Session     bool
+	Timeout     time.Duration
+	UserAgent   interface{}
 }

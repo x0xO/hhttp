@@ -1,8 +1,6 @@
 package hhttp
 
-import (
-	"context"
-)
+import "context"
 
 type async struct {
 	client *Client
