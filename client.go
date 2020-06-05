@@ -84,14 +84,14 @@ func (c *Client) SetOptions(opt *Options) *Client {
 		c.dialer.Resolver = c.opt.DNSoverTLS.dnsResolver
 	}
 
-	if c.opt.IP != "" {
-		if ip, err := net.ResolveTCPAddr("tcp", c.opt.IP+":0"); err == nil {
+	if c.opt.InterfaceAddr != "" {
+		if ip, err := net.ResolveTCPAddr("tcp", c.opt.InterfaceAddr+":0"); err == nil {
 			c.dialer.LocalAddr = ip
 		}
 	}
 
 	if c.opt.Timeout != 0 {
-		c.opt.Timeout = time.Second * c.opt.Timeout
+		c.cli.Timeout = time.Second * c.opt.Timeout
 	}
 
 	redirectPolicy := func(req *http.Request, via []*http.Request) error {
