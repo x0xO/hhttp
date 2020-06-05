@@ -130,15 +130,7 @@ func (c *Client) Post(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPost, data)
 }
 
-func (c *Client) PostJSON(URL string, data interface{}) *Request {
-	return c.buildRequest(URL, http.MethodPost, data)
-}
-
 func (c *Client) Put(URL string, data interface{}) *Request {
-	return c.buildRequest(URL, http.MethodPut, data)
-}
-
-func (c *Client) PutJSON(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPut, data)
 }
 
@@ -257,22 +249,26 @@ func (c *Client) buildBody(data interface{}) (io.Reader, string, error) {
 
 	switch data.(type) {
 	case []byte:
+		// raw data
 		contentType = http.DetectContentType(data.([]byte))
 		reader = bytes.NewReader(data.([]byte))
 	case string:
 		var in interface{}
-		if json.Unmarshal([]byte(data.(string)), &in) == nil { // if json
+		if json.Unmarshal([]byte(data.(string)), &in) == nil {
 			contentType = "application/json; charset=utf-8"
-		} else if xml.Unmarshal([]byte(data.(string)), &in) == nil { // if xml
+		} else if xml.Unmarshal([]byte(data.(string)), &in) == nil {
 			contentType = "application/xml; charset=utf-8"
 		} else {
+			// other types like pdf etc..
 			contentType = http.DetectContentType([]byte(data.(string)))
 		}
+		// if post encoded data aaa=bbb&ddd=ccc
 		if contentType == "text/plain; charset=utf-8" && strings.ContainsAny(data.(string), "=&") {
 			contentType = "application/x-www-form-urlencoded"
 		}
 		reader = strings.NewReader(data.(string))
 	case map[string]string:
+		// post data map[string]string{"aaa": "bbb", "ddd": "ccc"}
 		contentType = "application/x-www-form-urlencoded"
 		reader = strings.NewReader("")
 		form := url.Values{}
@@ -282,6 +278,7 @@ func (c *Client) buildBody(data interface{}) (io.Reader, string, error) {
 		reader = strings.NewReader(form.Encode())
 	default:
 		// TODO: check other types
+		// interfaces with tags like json, xml etc...
 		switch c.detectDataType(data) {
 		case "json":
 			contentType = "application/json; charset=utf-8"

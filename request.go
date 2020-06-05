@@ -58,6 +58,7 @@ func (req *Request) Do() (*Response, error) {
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),
 		History:       req.client.history,
+		Proto:         resp.Proto,
 		StatusCode:    resp.StatusCode,
 		Time:          elapsed,
 		URL:           resp.Request.URL,

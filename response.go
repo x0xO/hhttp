@@ -19,6 +19,7 @@ type Response struct {
 	Cookies       cookies
 	Headers       headers
 	History       history
+	Proto         string
 	StatusCode    int
 	Time          time.Duration
 	URL           *url.URL

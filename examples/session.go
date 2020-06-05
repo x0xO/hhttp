@@ -9,7 +9,7 @@ import (
 func main() {
 	URL := "https://httpbingo.org/cookies"
 
-    // need to enable session in options
+	// need to enable session in options
 	opt := hhttp.NewOptions()
 	opt.Session()
 

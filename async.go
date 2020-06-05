@@ -103,28 +103,6 @@ func (a *async) Post(URLS []string, data interface{}) *Requests {
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) PostJSON(URLS []string, data interface{}) *Requests {
-	jobs := make(chan *Request)
-
-	go func() {
-		defer close(jobs)
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.PostJSON(URL, data)
-				}
-				continue
-			}
-			jobs <- a.client.PostJSON(URL, data)
-		}
-	}()
-
-	return &Requests{jobs: jobs}
-}
-
 func (a *async) Put(URLS []string, data interface{}) *Requests {
 	jobs := make(chan *Request)
 
@@ -141,28 +119,6 @@ func (a *async) Put(URLS []string, data interface{}) *Requests {
 				continue
 			}
 			jobs <- a.client.Put(URL, data)
-		}
-	}()
-
-	return &Requests{jobs: jobs}
-}
-
-func (a *async) PutJSON(URLS []string, data interface{}) *Requests {
-	jobs := make(chan *Request)
-
-	go func() {
-		defer close(jobs)
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.PutJSON(URL, data)
-				}
-				continue
-			}
-			jobs <- a.client.PutJSON(URL, data)
 		}
 	}()
 
