@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	r, err := hhttp.NewClient().SetOptions(&hhttp.Options{Timeout: 1}).Get("httpbingo.org/delay/5").Do()
+	r, err := hhttp.NewClient().SetOptions(hhttp.NewOptions().Timeout(1)).Get("httpbingo.org/delay/5").Do()
 	if err != nil {
 		log.Fatal(err)
 	}

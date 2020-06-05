@@ -9,29 +9,27 @@ import (
 )
 
 type dnsOverTLS struct {
-	dnsResolver *net.Resolver
+	opt *options
 }
 
-func DNSoverTLS() *dnsOverTLS { return &dnsOverTLS{} }
-
-func (dot *dnsOverTLS) Google() *dnsOverTLS {
-	dot.dnsResolver = dot.resolver("dns.google", "8.8.8.8:853", "8.8.4.4:853")
-	return dot
+func (dot *dnsOverTLS) Google() *options {
+	dot.opt.dotResolver = dot.resolver("dns.google", "8.8.8.8:853", "8.8.4.4:853")
+	return dot.opt
 }
 
-func (dot *dnsOverTLS) Cloudflare() *dnsOverTLS {
-	dot.dnsResolver = dot.resolver("cloudflare-dns.com", "1.1.1.1:853", "1.0.0.1:853")
-	return dot
+func (dot *dnsOverTLS) Cloudflare() *options {
+	dot.opt.dotResolver = dot.resolver("cloudflare-dns.com", "1.1.1.1:853", "1.0.0.1:853")
+	return dot.opt
 }
 
-func (dot *dnsOverTLS) Libredns() *dnsOverTLS {
-	dot.dnsResolver = dot.resolver("dot.libredns.gr", "116.202.176.26:853")
-	return dot
+func (dot *dnsOverTLS) Libredns() *options {
+	dot.opt.dotResolver = dot.resolver("dot.libredns.gr", "116.202.176.26:853")
+	return dot.opt
 }
 
-func (dot *dnsOverTLS) Quad9() *dnsOverTLS {
-	dot.dnsResolver = dot.resolver("dns.quad9.net", "9.9.9.9:853", "149.112.112.112:853")
-	return dot
+func (dot *dnsOverTLS) Quad9() *options {
+	dot.opt.dotResolver = dot.resolver("dns.quad9.net", "9.9.9.9:853", "149.112.112.112:853")
+	return dot.opt
 }
 
 func (dot dnsOverTLS) resolver(serverName string, addresses ...string) *net.Resolver {

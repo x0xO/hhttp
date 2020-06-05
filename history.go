@@ -14,6 +14,7 @@ func (his history) URLS() []*url.URL {
 			URLs = append(URLs, h.Request.URL)
 		}
 	}
+
 	return URLs
 }
 
@@ -24,6 +25,7 @@ func (his history) Referers() []string {
 			referers = append(referers, h.Request.Referer())
 		}
 	}
+
 	return referers
 }
 
@@ -42,5 +44,6 @@ func (his history) Cookies() [][]*http.Cookie {
 			cookies = append(cookies, h.Cookies())
 		}
 	}
+
 	return cookies
 }

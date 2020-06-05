@@ -19,9 +19,9 @@ func main() {
 		} `json:"headers"`
 	}
 
-	opt := hhttp.Options{UserAgent: []string{"one", "two", "three", "four", "five"}}
+	opt := hhttp.NewOptions().UserAgent([]string{"one", "two", "three", "four", "five"})
 
-	jobs, errors := hhttp.NewClient().SetOptions(&opt).Async.Get(URLs).Do()
+	jobs, errors := hhttp.NewClient().SetOptions(opt).Async.Get(URLs).Do()
 
 	var wg sync.WaitGroup
 	wg.Add(2)

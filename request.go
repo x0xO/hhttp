@@ -93,30 +93,30 @@ func (req *Request) acceptOptions() error {
 
 	if req.client.opt != nil {
 
-		if req.client.opt.BasicAuth != nil && req.request.Header.Get("Authorization") == "" {
+		if req.client.opt.basicAuth != nil && req.request.Header.Get("Authorization") == "" {
 			err := req.basicAuth()
 			if err != nil {
 				return err
 			}
 		}
 
-		if req.client.opt.UserAgent != nil {
-			switch req.client.opt.UserAgent.(type) {
+		if req.client.opt.userAgent != nil {
+			switch req.client.opt.userAgent.(type) {
 			case string:
-				userAgent = req.client.opt.UserAgent.(string)
+				userAgent = req.client.opt.userAgent.(string)
 			case []string:
-				userAgent = req.client.opt.UserAgent.([]string)[rand.Intn(len(req.client.opt.UserAgent.([]string)))]
+				userAgent = req.client.opt.userAgent.([]string)[rand.Intn(len(req.client.opt.userAgent.([]string)))]
 			}
 		}
 
-		if req.client.opt.Proxy != nil {
+		if req.client.opt.proxy != nil {
 			var proxy string
 
-			switch req.client.opt.Proxy.(type) {
+			switch req.client.opt.proxy.(type) {
 			case string:
-				proxy = req.client.opt.Proxy.(string)
+				proxy = req.client.opt.proxy.(string)
 			case []string:
-				proxy = req.client.opt.Proxy.([]string)[rand.Intn(len(req.client.opt.Proxy.([]string)))]
+				proxy = req.client.opt.proxy.([]string)[rand.Intn(len(req.client.opt.proxy.([]string)))]
 			}
 
 			if proxyURL, err := url.Parse(proxy); err == nil && proxyURL.Scheme != "" {
@@ -135,23 +135,23 @@ func (req *Request) basicAuth() error {
 	baError := errors.New("basic authorization option parameter error")
 	user, password := "", ""
 
-	switch req.client.opt.BasicAuth.(type) {
+	switch req.client.opt.basicAuth.(type) {
 	case string:
-		ba := strings.Split(req.client.opt.BasicAuth.(string), ":")
+		ba := strings.Split(req.client.opt.basicAuth.(string), ":")
 		if len(ba) != 2 {
 			return baError
 		}
 		user = ba[0]
 		password = ba[1]
 	case []string:
-		ba := req.client.opt.BasicAuth.([]string)
+		ba := req.client.opt.basicAuth.([]string)
 		if len(ba) != 2 {
 			return baError
 		}
 		user = ba[0]
 		password = ba[1]
 	case map[string]string:
-		ba := req.client.opt.BasicAuth.(map[string]string)
+		ba := req.client.opt.basicAuth.(map[string]string)
 		if len(ba) != 1 {
 			return baError
 		}

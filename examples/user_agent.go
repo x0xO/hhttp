@@ -23,9 +23,9 @@ func main() {
 	fmt.Printf("default user agent: %s\n", get.Headers.UserAgent)
 
 	// change user-agent header
-	options := hhttp.Options{UserAgent: "From Root with love!!!"}
+	opt := hhttp.NewOptions().UserAgent("From Root with love!!!")
 
-	r, _ = hhttp.NewClient().SetOptions(&options).Get(URL).Do()
+	r, _ = hhttp.NewClient().SetOptions(opt).Get(URL).Do()
 
 	r.JSON(&get)
 

@@ -26,7 +26,7 @@ type Client struct {
 	cli       *http.Client
 	dialer    *net.Dialer
 	history   history
-	opt       *Options
+	opt       *options
 	transport *http.Transport
 }
 
@@ -58,47 +58,47 @@ func NewClient() *Client {
 	return &c
 }
 
-func (c *Client) SetOptions(opt *Options) *Client {
+func (c *Client) SetOptions(opt *options) *Client {
 	c.opt = opt
 
-	if c.opt.Session {
+	if c.opt.session {
 		c.cli.Jar, _ = cookiejar.New(nil)
 	}
 
 	maxRedirects := defaultRedirects
-	if c.opt.MaxRedirect != 0 {
-		maxRedirects = c.opt.MaxRedirect
+	if c.opt.maxRedirects != 0 {
+		maxRedirects = c.opt.maxRedirects
 	}
 
-	if c.opt.DNS != "" && c.opt.DNSoverTLS == nil {
+	if c.opt.dotResolver != nil {
+		c.dialer.Resolver = c.opt.dotResolver
+	}
+
+	if c.opt.dns != "" && c.opt.dotResolver == nil {
 		c.dialer.Resolver = &net.Resolver{
 			PreferGo: true,
 			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 				var dialer net.Dialer
-				return dialer.DialContext(ctx, "udp", c.opt.DNS)
+				return dialer.DialContext(ctx, "udp", c.opt.dns)
 			},
 		}
 	}
 
-	if c.opt.DNSoverTLS != nil && c.opt.DNSoverTLS.dnsResolver != nil {
-		c.dialer.Resolver = c.opt.DNSoverTLS.dnsResolver
-	}
-
-	if c.opt.InterfaceAddr != "" {
-		if ip, err := net.ResolveTCPAddr("tcp", c.opt.InterfaceAddr+":0"); err == nil {
+	if c.opt.interfaceAddr != "" {
+		if ip, err := net.ResolveTCPAddr("tcp", c.opt.interfaceAddr+":0"); err == nil {
 			c.dialer.LocalAddr = ip
 		}
 	}
 
-	if c.opt.Timeout != 0 {
-		c.cli.Timeout = time.Second * c.opt.Timeout
+	if c.opt.timeout != 0 {
+		c.cli.Timeout = time.Second * c.opt.timeout
 	}
 
 	redirectPolicy := func(req *http.Request, via []*http.Request) error {
 		if len(via) >= maxRedirects {
 			return fmt.Errorf("stopped after %d redirects", maxRedirects)
 		}
-		if c.opt.History {
+		if c.opt.history {
 			c.history = append(c.history, req.Response)
 		}
 		return nil
