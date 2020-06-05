@@ -11,6 +11,7 @@ type options struct {
 	dns           string
 	dotResolver   *net.Resolver
 	history       bool
+	http2         bool
 	interfaceAddr string
 	maxRedirects  int
 	proxy         interface{}
@@ -46,6 +47,15 @@ func (opt *options) History(enable ...bool) *options {
 		opt.history = enable[0]
 	} else {
 		opt.history = true
+	}
+	return opt
+}
+
+func (opt *options) HTTP2(enable ...bool) *options {
+	if len(enable) != 0 {
+		opt.http2 = enable[0]
+	} else {
+		opt.http2 = true
 	}
 	return opt
 }

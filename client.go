@@ -19,6 +19,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"golang.org/x/net/http2"
 )
 
 type Client struct {
@@ -60,6 +62,10 @@ func NewClient() *Client {
 
 func (c *Client) SetOptions(opt *options) *Client {
 	c.opt = opt
+
+	if c.opt.http2 {
+		http2.ConfigureTransport(c.transport)
+	}
 
 	if c.opt.session {
 		c.cli.Jar, _ = cookiejar.New(nil)
