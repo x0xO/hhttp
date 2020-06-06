@@ -13,23 +13,23 @@ type dnsOverTLS struct {
 }
 
 func (dot *dnsOverTLS) Google() *options {
-	dot.opt.dotResolver = dot.resolver("dns.google", "8.8.8.8:853", "8.8.4.4:853")
-	return dot.opt
+	return dot.AddProvider("dns.google", "8.8.8.8:853", "8.8.4.4:853")
 }
 
 func (dot *dnsOverTLS) Cloudflare() *options {
-	dot.opt.dotResolver = dot.resolver("cloudflare-dns.com", "1.1.1.1:853", "1.0.0.1:853")
-	return dot.opt
+	return dot.AddProvider("cloudflare-dns.com", "1.1.1.1:853", "1.0.0.1:853")
 }
 
 func (dot *dnsOverTLS) Libredns() *options {
-	dot.opt.dotResolver = dot.resolver("dot.libredns.gr", "116.202.176.26:853")
-	return dot.opt
+	return dot.AddProvider("dot.libredns.gr", "116.202.176.26:853")
 }
 
 func (dot *dnsOverTLS) Quad9() *options {
-	dot.opt.dotResolver = dot.resolver("dns.quad9.net", "9.9.9.9:853", "149.112.112.112:853")
-	return dot.opt
+	return dot.AddProvider("dns.quad9.net", "9.9.9.9:853", "149.112.112.112:853")
+}
+
+func (dot *dnsOverTLS) Switch() *options {
+	return dot.AddProvider("dns.switch.ch", "130.59.31.248:853", "130.59.31.251:853")
 }
 
 func (dot dnsOverTLS) resolver(serverName string, addresses ...string) *net.Resolver {
@@ -37,6 +37,11 @@ func (dot dnsOverTLS) resolver(serverName string, addresses ...string) *net.Reso
 		PreferGo: true,
 		Dial:     dial(serverName, addresses...),
 	}
+}
+
+func (dot *dnsOverTLS) AddProvider(serverName string, addresses ...string) *options {
+	dot.opt.dotResolver = dot.resolver(serverName, addresses...)
+	return dot.opt
 }
 
 func dial(serverName string, addresses ...string) func(context.Context, string, string) (net.Conn, error) {
