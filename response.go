@@ -41,15 +41,15 @@ func (resp *Response) SetCookie(URL string, cookies []*http.Cookie) error {
 }
 
 func (resp Response) Dump(filename string) error {
-	return ioutil.WriteFile(filename, resp.Body, 0o644)
+	return ioutil.WriteFile(filename, resp.Body.bytes, 0o644)
 }
 
 func (resp Response) XML(data interface{}) error {
-	return xml.Unmarshal(resp.Body, data)
+	return xml.Unmarshal(resp.Body.bytes, data)
 }
 
 func (resp Response) JSON(data interface{}) error {
-	return json.Unmarshal(resp.Body, data)
+	return json.Unmarshal(resp.Body.bytes, data)
 }
 
 func (resp Response) Debug(verbos ...bool) {

@@ -46,14 +46,14 @@ func (req *Request) Do() (*Response, error) {
 		reader = resp.Body
 	}
 
-	body, err := ioutil.ReadAll(reader)
+	bodyBytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Response{
 		Client:        req.client,
-		Body:          body,
+		Body:          body{bodyBytes, headers(resp.Header)},
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),
