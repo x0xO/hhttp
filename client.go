@@ -110,7 +110,12 @@ func (c *Client) SetOptions(opt *options) *Client {
 		return nil
 	}
 
+	if c.opt.redirectPolicy != nil {
+		redirectPolicy = c.opt.redirectPolicy
+	}
+
 	c.cli.CheckRedirect = redirectPolicy
+
 	return c
 }
 

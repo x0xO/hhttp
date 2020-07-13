@@ -3,21 +3,23 @@ package hhttp
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"time"
 )
 
 type options struct {
-	basicAuth     interface{}
-	dns           string
-	dotResolver   *net.Resolver
-	history       bool
-	http2         bool
-	interfaceAddr string
-	maxRedirects  int
-	proxy         interface{}
-	session       bool
-	timeout       time.Duration
-	userAgent     interface{}
+	basicAuth      interface{}
+	dns            string
+	dotResolver    *net.Resolver
+	history        bool
+	http2          bool
+	interfaceAddr  string
+	maxRedirects   int
+	proxy          interface{}
+	session        bool
+	timeout        time.Duration
+	userAgent      interface{}
+	redirectPolicy func(*http.Request, []*http.Request) error
 }
 
 func NewOptions() *options {
@@ -62,6 +64,11 @@ func (opt *options) HTTP2(enable ...bool) *options {
 
 func (opt *options) InterfaceAddr(addr string) *options {
 	opt.interfaceAddr = addr
+	return opt
+}
+
+func (opt *options) RedirectPolicy(f func(*http.Request, []*http.Request) error) *options {
+	opt.redirectPolicy = f
 	return opt
 }
 
