@@ -23,6 +23,7 @@ type Response struct {
 	History       history
 	Proto         string
 	StatusCode    int
+	Status        string
 	Time          time.Duration
 	URL           *url.URL
 	UserAgent     string
