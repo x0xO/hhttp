@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -41,6 +43,11 @@ func (resp *Response) SetCookie(URL string, cookies []*http.Cookie) error {
 }
 
 func (resp Response) Dump(filename string) error {
+	path := filepath.Dir(filename)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(path, 0o755)
+	}
+
 	return ioutil.WriteFile(filename, resp.Body.bytes, 0o644)
 }
 
