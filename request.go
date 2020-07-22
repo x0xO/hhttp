@@ -70,21 +70,19 @@ func (req *Request) Do() (*Response, error) {
 }
 
 func (req *Request) SetHeaders(headers map[string]string) *Request {
-	if headers == nil {
-		return req
-	}
-	for header, data := range headers {
-		req.request.Header.Set(header, data)
+	if headers != nil && req.request != nil {
+		for header, data := range headers {
+			req.request.Header.Set(header, data)
+		}
 	}
 	return req
 }
 
 func (req *Request) AddHeaders(headers map[string]string) *Request {
-	if headers == nil {
-		return req
-	}
-	for header, data := range headers {
-		req.request.Header.Add(header, data)
+	if headers != nil && req.request != nil {
+		for header, data := range headers {
+			req.request.Header.Add(header, data)
+		}
 	}
 	return req
 }

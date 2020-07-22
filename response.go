@@ -22,8 +22,8 @@ type Response struct {
 	Headers       headers
 	History       history
 	Proto         string
-	StatusCode    int
 	Status        string
+	StatusCode    int
 	Time          time.Duration
 	URL           *url.URL
 	UserAgent     string
