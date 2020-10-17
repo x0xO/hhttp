@@ -3,7 +3,9 @@ package hhttp
 import (
 	"runtime"
 	"sync"
-	"syscall"
+
+	// "syscall"
+	syscall "golang.org/x/sys/unix"
 )
 
 type Requests struct {
