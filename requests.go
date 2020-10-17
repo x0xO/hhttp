@@ -3,7 +3,8 @@ package hhttp
 import (
 	"runtime"
 	"sync"
-	"syscall"
+
+	"github.com/x0xO/hhttp/hsyscall"
 )
 
 type Requests struct {
@@ -18,11 +19,7 @@ func (reqs *Requests) Do() (chan *Response, chan error) {
 
 	if reqs.maxWorkers != 0 {
 		if runtime.GOOS != "windows" {
-			var rLimit syscall.Rlimit
-			syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-			if uint64(reqs.maxWorkers) > rLimit.Cur {
-				reqs.maxWorkers = int(float64(rLimit.Cur) * 0.7)
-			}
+			reqs.maxWorkers = hsyscall.RlimitStack(maxWorkers)
 		}
 		maxWorkers = reqs.maxWorkers
 	}
