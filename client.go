@@ -9,12 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -27,9 +27,9 @@ type Client struct {
 	Async     *async
 	cli       *http.Client
 	dialer    *net.Dialer
-	history   history
 	opt       *options
 	transport *http.Transport
+	history   history
 }
 
 func NewClient() *Client {
@@ -167,7 +167,7 @@ func (c *Client) PostFile(URL, fieldName, filePath string, data ...interface{}) 
 	}
 
 	if reader == nil {
-		file, err := ioutil.ReadFile(filePath)
+		file, err := os.ReadFile(filePath)
 		if err != nil {
 			return &Request{error: err}
 		}

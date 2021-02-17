@@ -2,7 +2,7 @@ package hhttp
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"regexp"
 	"strings"
 
@@ -10,8 +10,8 @@ import (
 )
 
 type body struct {
-	bytes   []byte
 	headers headers
+	bytes   []byte
 }
 
 func (b body) String() string {
@@ -42,10 +42,10 @@ func (b body) UTF8() body {
 		return b
 	}
 
-	utf8Body, err := ioutil.ReadAll(utf8Reader)
+	utf8Body, err := io.ReadAll(utf8Reader)
 	if err != nil {
 		return b
 	}
 
-	return body{utf8Body, b.headers}
+	return body{b.headers, utf8Body}
 }

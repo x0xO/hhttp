@@ -21,7 +21,7 @@ func main() {
 	// 	return
 	// }
 	//
-	// body, _ := ioutil.ReadAll(resp.Body)
+	// body, _ := io.ReadAll(resp.Body)
 	//
 	// fmt.Println(string(body))
 }

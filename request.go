@@ -4,7 +4,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -46,14 +45,14 @@ func (req *Request) Do() (*Response, error) {
 		reader = resp.Body
 	}
 
-	bodyBytes, err := ioutil.ReadAll(reader)
+	bodyBytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Response{
 		Client:        req.client,
-		Body:          body{bodyBytes, headers(resp.Header)},
+		Body:          body{headers(resp.Header), bodyBytes},
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),

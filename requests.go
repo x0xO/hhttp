@@ -9,9 +9,9 @@ import (
 
 type Requests struct {
 	jobs       chan *Request
-	maxWorkers int
 	setHeaders map[string]string
 	addHeaders map[string]string
+	maxWorkers int
 }
 
 func (reqs *Requests) Do() (chan *Response, chan error) {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -15,20 +14,20 @@ import (
 )
 
 type Response struct {
+	Headers headers
+	request *http.Request
+	URL     *url.URL
 	*Client
-	Body          body
-	ContentLength int64
-	Cookies       cookies
-	Headers       headers
-	History       history
+	response      *http.Response
+	UserAgent     string
 	Proto         string
 	Status        string
+	Body          body
+	History       history
+	Cookies       cookies
 	StatusCode    int
 	Time          time.Duration
-	URL           *url.URL
-	UserAgent     string
-	request       *http.Request
-	response      *http.Response
+	ContentLength int64
 }
 
 func (resp Response) Referer() string {
@@ -50,7 +49,7 @@ func (resp Response) Dump(filename string) error {
 		}
 	}
 
-	return ioutil.WriteFile(filename, resp.Body.bytes, 0o644)
+	return os.WriteFile(filename, resp.Body.bytes, 0o644)
 }
 
 func (resp Response) XML(data interface{}) error {

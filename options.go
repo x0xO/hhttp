@@ -9,17 +9,17 @@ import (
 
 type options struct {
 	basicAuth      interface{}
-	dns            string
+	proxy          interface{}
+	userAgent      interface{}
 	dotResolver    *net.Resolver
+	redirectPolicy func(*http.Request, []*http.Request) error
+	dns            string
+	interfaceAddr  string
+	timeout        time.Duration
+	maxRedirects   int
+	session        bool
 	history        bool
 	http2          bool
-	interfaceAddr  string
-	maxRedirects   int
-	proxy          interface{}
-	session        bool
-	timeout        time.Duration
-	userAgent      interface{}
-	redirectPolicy func(*http.Request, []*http.Request) error
 }
 
 func NewOptions() *options {
