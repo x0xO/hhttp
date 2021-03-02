@@ -9,7 +9,7 @@ import (
 
 func main() {
 	opt := hhttp.NewOptions()
-	// opt.BodyLimit(3)
+	opt.BodyLimit(10)
 
 	r, err := hhttp.NewClient().SetOptions(opt).Get("http://httpbingo.org/get").Do()
 	if err != nil {
