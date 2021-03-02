@@ -13,8 +13,9 @@ type options struct {
 	userAgent      interface{}
 	dotResolver    *net.Resolver
 	redirectPolicy func(*http.Request, []*http.Request) error
-	dns            string
 	interfaceAddr  string
+	dns            string
+	limiter        int64
 	timeout        time.Duration
 	maxRedirects   int
 	session        bool
@@ -32,6 +33,11 @@ func (opt options) String() string {
 
 func (opt *options) BasicAuth(basicAuth interface{}) *options {
 	opt.basicAuth = basicAuth
+	return opt
+}
+
+func (opt *options) BodyLimit(limit int64) *options {
+	opt.limiter = limit
 	return opt
 }
 

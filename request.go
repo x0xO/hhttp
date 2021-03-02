@@ -45,7 +45,14 @@ func (req *Request) Do() (*Response, error) {
 		reader = resp.Body
 	}
 
-	bodyBytes, err := io.ReadAll(reader)
+	var bodyBytes []byte
+	switch req.client.opt.limiter {
+	case 0:
+		bodyBytes, err = io.ReadAll(reader)
+	default:
+		bodyBytes, err = io.ReadAll(io.LimitReader(reader, req.client.opt.limiter))
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +129,7 @@ func (req *Request) acceptOptions() error {
 				req.client.transport.Proxy = http.ProxyURL(proxyURL)
 			}
 		}
+
 	}
 
 	req.request.Header.Set("User-Agent", userAgent)
