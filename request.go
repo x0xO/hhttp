@@ -46,6 +46,7 @@ func (req *Request) Do() (*Response, error) {
 	}
 
 	var bodyBytes []byte
+
 	switch req.client.opt.limiter {
 	case 0:
 		bodyBytes, err = io.ReadAll(reader)
@@ -98,7 +99,6 @@ func (req *Request) acceptOptions() error {
 	req.client.transport.Proxy = http.ProxyFromEnvironment
 
 	if req.client.opt != nil {
-
 		if req.client.opt.basicAuth != nil && req.request.Header.Get("Authorization") == "" {
 			err := req.basicAuth()
 			if err != nil {
@@ -129,7 +129,8 @@ func (req *Request) acceptOptions() error {
 				req.client.transport.Proxy = http.ProxyURL(proxyURL)
 			}
 		}
-
+	} else {
+		req.client.opt = NewOptions()
 	}
 
 	req.request.Header.Set("User-Agent", userAgent)
