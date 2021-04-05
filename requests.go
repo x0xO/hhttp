@@ -1,6 +1,7 @@
 package hhttp
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 
@@ -19,9 +20,10 @@ func (reqs *Requests) Do() (chan *Response, chan error) {
 
 	if reqs.maxWorkers != 0 {
 		if runtime.GOOS != "windows" {
-			reqs.maxWorkers = hsyscall.RlimitStack(maxWorkers)
+			reqs.maxWorkers = hsyscall.RlimitStack(reqs.maxWorkers)
 		}
 		maxWorkers = reqs.maxWorkers
+		fmt.Println(maxWorkers)
 	}
 
 	results := make(chan *Response)

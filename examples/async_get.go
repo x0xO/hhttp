@@ -13,6 +13,15 @@ func main() {
 		URLs = append(URLs, "https://httpbingo.org/get")
 	}
 
+	// urls := make(chan string)
+	//
+	// go func() {
+	// 	defer close(urls)
+	// 	for _, URL := range URLs {
+	// 		urls <- URL
+	// 	}
+	// }()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	// ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 
