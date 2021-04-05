@@ -15,16 +15,25 @@ type options struct {
 	redirectPolicy func(*http.Request, []*http.Request) error
 	interfaceAddr  string
 	dns            string
-	limiter        int64
 	timeout        time.Duration
 	maxRedirects   int
 	session        bool
 	history        bool
 	http2          bool
+	stream         bool
 }
 
 func NewOptions() *options {
 	return &options{}
+}
+
+func (opt *options) Stream(enable ...bool) *options {
+	if len(enable) != 0 {
+		opt.stream = enable[0]
+	} else {
+		opt.stream = true
+	}
+	return opt
 }
 
 func (opt options) String() string {
@@ -33,11 +42,6 @@ func (opt options) String() string {
 
 func (opt *options) BasicAuth(basicAuth interface{}) *options {
 	opt.basicAuth = basicAuth
-	return opt
-}
-
-func (opt *options) BodyLimit(limit int64) *options {
-	opt.limiter = limit
 	return opt
 }
 

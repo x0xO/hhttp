@@ -1,9 +1,8 @@
 package hhttp
 
 import (
-	"compress/zlib"
+	"bufio"
 	"errors"
-	"io"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -32,35 +31,21 @@ func (req *Request) Do() (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	elapsed := time.Since(start)
 
-	var reader io.ReadCloser
-	switch resp.Header.Get("Content-Encoding") {
-	case "deflate":
-		reader, err = zlib.NewReader(resp.Body)
-		defer reader.Close()
-	default:
-		reader = resp.Body
+	var streamReader *bufio.Reader
+
+	if req.client.opt != nil && req.client.opt.stream {
+		streamReader = bufio.NewReader(resp.Body)
+		resp.Body = nil
 	}
 
-	var bodyBytes []byte
-
-	switch req.client.opt.limiter {
-	case 0:
-		bodyBytes, err = io.ReadAll(reader)
-	default:
-		bodyBytes, err = io.ReadAll(io.LimitReader(reader, req.client.opt.limiter))
-	}
-
-	if err != nil {
-		return nil, err
-	}
+	deflate := resp.Header.Get("Content-Encoding") == "deflate"
 
 	return &Response{
 		Client:        req.client,
-		Body:          body{headers(resp.Header), bodyBytes},
+		Body:          body{headers(resp.Header), resp.Body, streamReader, deflate},
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),
@@ -129,8 +114,6 @@ func (req *Request) acceptOptions() error {
 				req.client.transport.Proxy = http.ProxyURL(proxyURL)
 			}
 		}
-	} else {
-		req.client.opt = NewOptions()
 	}
 
 	req.request.Header.Set("User-Agent", userAgent)

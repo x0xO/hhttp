@@ -1,7 +1,9 @@
 package hhttp
 
 import (
+	"bufio"
 	"bytes"
+	"compress/zlib"
 	"io"
 	"regexp"
 	"strings"
@@ -11,25 +13,49 @@ import (
 
 type body struct {
 	headers headers
-	bytes   []byte
+	body    io.ReadCloser
+	stream  *bufio.Reader
+	deflate bool
 }
 
-func (b body) String() string {
-	return string(b.bytes)
+func (b body) String() string { return string(b.Bytes()) }
+
+func (b body) Stream() *bufio.Reader { return b.stream }
+
+func (b body) Limit(limiter int64) body {
+	return body{b.headers, io.NopCloser(io.LimitReader(b.body, limiter)), b.stream, b.deflate}
 }
 
-func (b body) Bytes() []byte {
-	return b.bytes
+func (b *body) Bytes() []byte {
+	if b.stream != nil {
+		b.body = io.NopCloser(b.stream)
+	}
+
+	defer b.body.Close()
+
+	if b.deflate {
+		var err error
+		if b.body, err = zlib.NewReader(b.body); err != nil {
+			return nil
+		}
+	}
+
+	bodyBytes, err := io.ReadAll(b.body)
+	if err != nil {
+		return nil
+	}
+
+	return bodyBytes
 }
 
 func (b body) Contains(pattern interface{}) bool {
 	switch pattern.(type) {
 	case []byte:
-		return bytes.Contains(bytes.ToLower(b.bytes), bytes.ToLower(pattern.([]byte)))
+		return bytes.Contains(bytes.ToLower(b.Bytes()), bytes.ToLower(pattern.([]byte)))
 	case string:
 		return strings.Contains(strings.ToLower(b.String()), strings.ToLower(pattern.(string)))
 	case *regexp.Regexp:
-		return pattern.(*regexp.Regexp).Match(b.bytes)
+		return pattern.(*regexp.Regexp).Match(b.Bytes())
 	default:
 		return false
 	}
@@ -37,15 +63,10 @@ func (b body) Contains(pattern interface{}) bool {
 
 func (b body) UTF8() body {
 	contentType := b.headers.Get("Content-Type")
-	utf8Reader, err := charset.NewReader(bytes.NewReader(b.bytes), contentType)
+	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), contentType)
 	if err != nil {
 		return b
 	}
 
-	utf8Body, err := io.ReadAll(utf8Reader)
-	if err != nil {
-		return b
-	}
-
-	return body{b.headers, utf8Body}
+	return body{b.headers, io.NopCloser(utf8Reader), b.stream, b.deflate}
 }

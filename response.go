@@ -49,15 +49,15 @@ func (resp Response) Dump(filename string) error {
 		}
 	}
 
-	return os.WriteFile(filename, resp.Body.bytes, 0o644)
+	return os.WriteFile(filename, resp.Body.Bytes(), 0o644)
 }
 
 func (resp Response) XML(data interface{}) error {
-	return xml.Unmarshal(resp.Body.bytes, data)
+	return xml.Unmarshal(resp.Body.Bytes(), data)
 }
 
 func (resp Response) JSON(data interface{}) error {
-	return json.Unmarshal(resp.Body.bytes, data)
+	return json.Unmarshal(resp.Body.Bytes(), data)
 }
 
 func (resp Response) Debug(verbos ...bool) {

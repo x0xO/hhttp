@@ -8,13 +8,10 @@ import (
 )
 
 func main() {
-	opt := hhttp.NewOptions()
-	opt.BodyLimit(10)
-
-	r, err := hhttp.NewClient().SetOptions(opt).Get("http://httpbingo.org/get").Do()
+	r, err := hhttp.NewClient().Get("http://httpbingo.org/get").Do()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(r.Body)
+	fmt.Println(r.Body.Limit(10))
 }
