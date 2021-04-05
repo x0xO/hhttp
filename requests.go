@@ -1,7 +1,6 @@
 package hhttp
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 
@@ -23,7 +22,6 @@ func (reqs *Requests) Do() (chan *Response, chan error) {
 			reqs.maxWorkers = hsyscall.RlimitStack(reqs.maxWorkers)
 		}
 		maxWorkers = reqs.maxWorkers
-		fmt.Println(maxWorkers)
 	}
 
 	results := make(chan *Response)

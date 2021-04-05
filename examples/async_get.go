@@ -15,11 +15,22 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	// ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-
 	defer cancel()
 
+	/* == URLS CHAN START == */
+	urls := make(chan string)
+	go func() {
+		defer close(urls)
+		for _, URL := range URLs {
+			urls <- URL
+		}
+	}()
+
+	jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(urls).Pool(20).Do() // chan string
+	/* == URLS CHAN END == */
+
 	// with context and pool worker, limit to 20 requests
-	jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(URLs).Pool(20).Do()
+	// jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(URLs).Pool(20).Do() // []string
 
 	for jobs != nil && errors != nil {
 		select {

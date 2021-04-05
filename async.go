@@ -12,135 +12,235 @@ func (a *async) WithContext(ctx context.Context) *async {
 	return a
 }
 
-func (a *async) Get(URLS []string, data ...interface{}) *Requests {
+func (a *async) Get(URLS interface{}, data ...interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
 
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.Get(URL, data...)
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						URLS = nil
+						return
+					default:
+						jobs <- a.client.Get(URL, data...)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.Get(URL, data...)
 			}
-			jobs <- a.client.Get(URL, data...)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Get(URL, data...)
+					}
+					continue
+				}
+				jobs <- a.client.Get(URL, data...)
+			}
 		}
 	}()
 
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) Delete(URLS []string, data ...interface{}) *Requests {
+func (a *async) Delete(URLS interface{}, data ...interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
 
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.Delete(URL, data...)
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Delete(URL, data...)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.Delete(URL, data...)
 			}
-			jobs <- a.client.Delete(URL, data...)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Delete(URL, data...)
+					}
+					continue
+				}
+				jobs <- a.client.Delete(URL, data...)
+			}
 		}
 	}()
 
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) Head(URLS []string) *Requests {
+func (a *async) Head(URLS interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
 
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.Head(URL)
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Head(URL)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.Head(URL)
 			}
-			jobs <- a.client.Head(URL)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Head(URL)
+					}
+					continue
+				}
+				jobs <- a.client.Head(URL)
+			}
 		}
 	}()
 
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) Post(URLS []string, data interface{}) *Requests {
+func (a *async) Post(URLS interface{}, data interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.Post(URL, data)
+
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Post(URL, data)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.Post(URL, data)
 			}
-			jobs <- a.client.Post(URL, data)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Post(URL, data)
+					}
+					continue
+				}
+				jobs <- a.client.Post(URL, data)
+			}
 		}
 	}()
 
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) Put(URLS []string, data interface{}) *Requests {
+func (a *async) Put(URLS interface{}, data interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.Put(URL, data)
+
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Put(URL, data)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.Put(URL, data)
 			}
-			jobs <- a.client.Put(URL, data)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Put(URL, data)
+					}
+					continue
+				}
+				jobs <- a.client.Put(URL, data)
+			}
 		}
 	}()
 
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) PostFile(URLS []string, fieldName, filePath string, uploadForm map[string]string) *Requests {
+func (a *async) PostFile(URLS interface{}, fieldName, filePath string, uploadForm map[string]string) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
 		defer close(jobs)
-		for _, URL := range URLS {
-			if a.ctx != nil {
-				select {
-				case <-a.ctx.Done():
-					return
-				default:
-					jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+					}
+					continue
 				}
-				continue
+				jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
 			}
-			jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+					}
+					continue
+				}
+				jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+			}
 		}
 	}()
 
