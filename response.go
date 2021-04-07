@@ -22,7 +22,7 @@ type Response struct {
 	UserAgent     string
 	Proto         string
 	Status        string
-	Body          body
+	Body          *body
 	History       history
 	Cookies       cookies
 	StatusCode    int
@@ -30,13 +30,13 @@ type Response struct {
 	ContentLength int64
 }
 
-func (resp Response) Referer() string {
-	return resp.response.Request.Referer()
-}
+func (resp Response) Referer() string { return resp.response.Request.Referer() }
 
-func (resp Response) GetCookies(URL string) []*http.Cookie {
-	return resp.getCookies(URL)
-}
+func (resp Response) GetCookies(URL string) []*http.Cookie { return resp.getCookies(URL) }
+
+func (resp Response) XML(data interface{}) error { return xml.Unmarshal(resp.Body.Bytes(), data) }
+
+func (resp Response) JSON(data interface{}) error { return json.Unmarshal(resp.Body.Bytes(), data) }
 
 func (resp *Response) SetCookie(URL string, cookies []*http.Cookie) error {
 	return resp.setCookies(URL, cookies)
@@ -50,14 +50,6 @@ func (resp Response) Dump(filename string) error {
 	}
 
 	return os.WriteFile(filename, resp.Body.Bytes(), 0o644)
-}
-
-func (resp Response) XML(data interface{}) error {
-	return xml.Unmarshal(resp.Body.Bytes(), data)
-}
-
-func (resp Response) JSON(data interface{}) error {
-	return json.Unmarshal(resp.Body.Bytes(), data)
 }
 
 func (resp Response) Debug(verbos ...bool) {

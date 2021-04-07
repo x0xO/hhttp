@@ -18,19 +18,19 @@ func main() {
 	defer cancel()
 
 	/* == URLS CHAN START == */
-	urls := make(chan string)
+	urlsChan := make(chan string)
 	go func() {
-		defer close(urls)
+		defer close(urlsChan)
 		for _, URL := range URLs {
-			urls <- URL
+			urlsChan <- URL
 		}
 	}()
 
-	jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(urls).Pool(20).Do() // chan string
+	jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(urlsChan).Pool(20).Do() // urls chan string
 	/* == URLS CHAN END == */
 
 	// with context and pool worker, limit to 20 requests
-	// jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(URLs).Pool(20).Do() // []string
+	// jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(URLs).Pool(20).Do() // urls []string
 
 	for jobs != nil && errors != nil {
 		select {

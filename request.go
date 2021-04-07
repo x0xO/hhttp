@@ -45,7 +45,7 @@ func (req *Request) Do() (*Response, error) {
 
 	return &Response{
 		Client:        req.client,
-		Body:          body{headers(resp.Header), resp.Body, streamReader, deflate},
+		Body:          &body{headers(resp.Header), resp.Body, streamReader, deflate, -1},
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),

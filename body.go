@@ -16,14 +16,26 @@ type body struct {
 	body    io.ReadCloser
 	stream  *bufio.Reader
 	deflate bool
+	limiter int64
 }
 
 func (b body) String() string { return string(b.Bytes()) }
 
 func (b body) Stream() *bufio.Reader { return b.stream }
 
-func (b body) Limit(limiter int64) body {
-	return body{b.headers, io.NopCloser(io.LimitReader(b.body, limiter)), b.stream, b.deflate}
+func (b *body) Close() error { return b.body.Close() }
+
+func (b *body) Limit(limiter int64) *body { b.limiter = limiter; return b }
+
+func (b *body) UTF8() *body {
+	contentType := b.headers.Get("Content-Type")
+	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), contentType)
+	if err != nil {
+		return b
+	}
+
+	b.body = io.NopCloser(utf8Reader)
+	return b
 }
 
 func (b *body) Bytes() []byte {
@@ -31,16 +43,22 @@ func (b *body) Bytes() []byte {
 		b.body = io.NopCloser(b.stream)
 	}
 
-	defer b.body.Close()
+	defer b.Close()
 
+	var err error
 	if b.deflate {
-		var err error
 		if b.body, err = zlib.NewReader(b.body); err != nil {
 			return nil
 		}
 	}
 
-	bodyBytes, err := io.ReadAll(b.body)
+	var bodyBytes []byte
+	if b.limiter != -1 {
+		bodyBytes, err = io.ReadAll(io.LimitReader(b.body, b.limiter))
+	} else {
+		bodyBytes, err = io.ReadAll(b.body)
+	}
+
 	if err != nil {
 		return nil
 	}
@@ -59,14 +77,4 @@ func (b body) Contains(pattern interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (b body) UTF8() body {
-	contentType := b.headers.Get("Content-Type")
-	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), contentType)
-	if err != nil {
-		return b
-	}
-
-	return body{b.headers, io.NopCloser(utf8Reader), b.stream, b.deflate}
 }
