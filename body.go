@@ -16,16 +16,16 @@ type body struct {
 	body    io.ReadCloser
 	stream  *bufio.Reader
 	deflate bool
-	limiter int64
+	limit   int64
 }
+
+func (b *body) Stream() *bufio.Reader { return b.stream }
 
 func (b body) String() string { return string(b.Bytes()) }
 
-func (b body) Stream() *bufio.Reader { return b.stream }
-
 func (b *body) Close() error { return b.body.Close() }
 
-func (b *body) Limit(limiter int64) *body { b.limiter = limiter; return b }
+func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
 
 func (b *body) UTF8() *body {
 	contentType := b.headers.Get("Content-Type")
@@ -53,8 +53,8 @@ func (b *body) Bytes() []byte {
 	}
 
 	var bodyBytes []byte
-	if b.limiter != -1 {
-		bodyBytes, err = io.ReadAll(io.LimitReader(b.body, b.limiter))
+	if b.limit != -1 {
+		bodyBytes, err = io.ReadAll(io.LimitReader(b.body, b.limit))
 	} else {
 		bodyBytes, err = io.ReadAll(b.body)
 	}

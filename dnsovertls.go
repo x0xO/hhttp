@@ -8,9 +8,7 @@ import (
 	"time"
 )
 
-type dnsOverTLS struct {
-	opt *options
-}
+type dnsOverTLS struct{ opt *options }
 
 func (dot *dnsOverTLS) Google() *options {
 	return dot.AddProvider("dns.google", "8.8.8.8:853", "8.8.4.4:853")
