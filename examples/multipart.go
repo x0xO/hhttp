@@ -17,5 +17,6 @@ func main() {
 		"your-message":            "message",
 	}
 
-	hhttp.NewClient().Multipart("http://someurl.com", multipartData).Do()
+	r, _ := hhttp.NewClient().Multipart("http://someurl.com", multipartData).Do()
+	r.Body.Close()
 }
