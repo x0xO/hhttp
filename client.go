@@ -145,7 +145,7 @@ func (c *Client) Put(URL string, data interface{}) *Request {
 	return c.buildRequest(URL, http.MethodPut, data)
 }
 
-func (c *Client) PostFile(URL, fieldName, filePath string, data ...interface{}) *Request {
+func (c *Client) FileUpload(URL, fieldName, filePath string, data ...interface{}) *Request {
 	URL = c.urlFormater(URL)
 
 	var (
@@ -182,7 +182,9 @@ func (c *Client) PostFile(URL, fieldName, filePath string, data ...interface{}) 
 		return &Request{error: err}
 	}
 
-	io.Copy(part, reader)
+	if _, err := io.Copy(part, reader); err != nil {
+		return &Request{error: err}
+	}
 
 	if multipartValues != nil {
 		for field, value := range multipartValues {
@@ -190,7 +192,40 @@ func (c *Client) PostFile(URL, fieldName, filePath string, data ...interface{}) 
 		}
 	}
 
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return &Request{error: err}
+	}
+
+	req, err := http.NewRequest(http.MethodPost, URL, body)
+	if err != nil {
+		return &Request{error: err}
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	return &Request{request: req, client: c}
+}
+
+func (c *Client) Multipart(URL string, multipartValues map[string]string) *Request {
+	URL = c.urlFormater(URL)
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	for field, value := range multipartValues {
+		formWriter, err := writer.CreateFormField(field)
+		if err != nil {
+			return &Request{error: err}
+		}
+
+		if _, err := io.Copy(formWriter, strings.NewReader(value)); err != nil {
+			return &Request{error: err}
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		return &Request{error: err}
+	}
 
 	req, err := http.NewRequest(http.MethodPost, URL, body)
 	if err != nil {

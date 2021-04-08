@@ -208,7 +208,7 @@ func (a *async) Put(URLS interface{}, data interface{}) *Requests {
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) PostFile(URLS interface{}, fieldName, filePath string, uploadForm map[string]string) *Requests {
+func (a *async) FileUpload(URLS interface{}, fieldName, filePath string, data ...interface{}) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {
@@ -222,11 +222,11 @@ func (a *async) PostFile(URLS interface{}, fieldName, filePath string, uploadFor
 					case <-a.ctx.Done():
 						return
 					default:
-						jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+						jobs <- a.client.FileUpload(URL, fieldName, filePath, data...)
 					}
 					continue
 				}
-				jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+				jobs <- a.client.FileUpload(URL, fieldName, filePath, data...)
 			}
 		case []string:
 			for _, URL := range URLS.([]string) {
@@ -235,11 +235,50 @@ func (a *async) PostFile(URLS interface{}, fieldName, filePath string, uploadFor
 					case <-a.ctx.Done():
 						return
 					default:
-						jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+						jobs <- a.client.FileUpload(URL, fieldName, filePath, data...)
 					}
 					continue
 				}
-				jobs <- a.client.PostFile(URL, fieldName, filePath, uploadForm)
+				jobs <- a.client.FileUpload(URL, fieldName, filePath, data...)
+			}
+		}
+	}()
+
+	return &Requests{jobs: jobs}
+}
+
+func (a *async) Multipart(URLS interface{}, multipartValues map[string]string) *Requests {
+	jobs := make(chan *Request)
+
+	go func() {
+		defer close(jobs)
+
+		switch URLS.(type) {
+		case chan string:
+			for URL := range URLS.(chan string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Multipart(URL, multipartValues)
+					}
+					continue
+				}
+				jobs <- a.client.Multipart(URL, multipartValues)
+			}
+		case []string:
+			for _, URL := range URLS.([]string) {
+				if a.ctx != nil {
+					select {
+					case <-a.ctx.Done():
+						return
+					default:
+						jobs <- a.client.Multipart(URL, multipartValues)
+					}
+					continue
+				}
+				jobs <- a.client.Multipart(URL, multipartValues)
 			}
 		}
 	}()
