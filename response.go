@@ -38,7 +38,7 @@ func (resp Response) XML(data interface{}) error { return xml.Unmarshal(resp.Bod
 
 func (resp Response) JSON(data interface{}) error { return json.Unmarshal(resp.Body.Bytes(), data) }
 
-func (resp *Response) SetCookie(URL string, cookies []*http.Cookie) error {
+func (resp *Response) SetCookies(URL string, cookies []*http.Cookie) error {
 	return resp.setCookies(URL, cookies)
 }
 

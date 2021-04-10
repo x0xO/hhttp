@@ -18,6 +18,7 @@ type body struct {
 	content []byte
 	limit   int64
 	deflate bool
+	utf8    bool
 }
 
 func (b *body) Stream() *bufio.Reader { return b.stream }
@@ -29,13 +30,21 @@ func (b *body) Close() error { return b.body.Close() }
 func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
 
 func (b *body) UTF8() *body {
+	if b.utf8 {
+		return b
+	}
+
 	contentType := b.headers.Get("Content-Type")
+
 	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), contentType)
 	if err != nil {
 		return b
 	}
 
 	b.body = io.NopCloser(utf8Reader)
+	b.content = nil
+	b.utf8 = true
+
 	return b
 }
 

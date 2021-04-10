@@ -18,7 +18,7 @@ func main() {
 	r.Debug()
 
 	// set cookie after first request
-	r.SetCookie(URL, []*http.Cookie{{Name: "root", Value: "cookie"}})
+	r.SetCookies(URL, []*http.Cookie{{Name: "root", Value: "cookie"}})
 
 	r, _ = r.Get(URL).Do()
 	r.Debug()
