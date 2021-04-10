@@ -29,23 +29,29 @@ func (b *body) Close() error { return b.body.Close() }
 
 func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
 
-func (b *body) UTF8() *body {
-	if b.utf8 {
-		return b
+func (b *body) UTF8() string {
+	var (
+		content string
+		err     error
+	)
+
+	if b.content != nil {
+		content = string(b.content)
+	} else {
+		content = b.String()
 	}
 
-	contentType := b.headers.Get("Content-Type")
-
-	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), contentType)
+	utf8Reader, err := charset.NewReader(strings.NewReader(content), b.headers.Get("Content-Type"))
 	if err != nil {
-		return b
+		return content
 	}
 
-	b.body = io.NopCloser(utf8Reader)
-	b.content = nil
-	b.utf8 = true
+	utf8Content, err := io.ReadAll(utf8Reader)
+	if err != nil {
+		return content
+	}
 
-	return b
+	return string(utf8Content)
 }
 
 func (b *body) Bytes() []byte {
