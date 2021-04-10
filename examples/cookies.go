@@ -10,9 +10,15 @@ import (
 func main() {
 	URL := "http://google.com"
 
-	r, _ := hhttp.NewClient().SetOptions(hhttp.NewOptions().Session()).Get(URL).Do()
+	// cookie before request
+	c1 := http.Cookie{Name: "root1", Value: "cookie1"}
+	c2 := http.Cookie{Name: "root2", Value: "cookie2"}
 
-	r.SetCookie(URL, []*http.Cookie{{Name: "root", Value: "cookies"}})
+	r, _ := hhttp.NewClient().SetOptions(hhttp.NewOptions().Session()).Get(URL).AddCookies(c1, c2).Do()
+	r.Debug()
+
+	// set cookie after first request
+	r.SetCookie(URL, []*http.Cookie{{Name: "root", Value: "cookie"}})
 
 	r, _ = r.Get(URL).Do()
 	r.Debug()

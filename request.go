@@ -68,8 +68,10 @@ func (req *Request) Do() (*Response, error) {
 	}, nil
 }
 
-func (req *Request) AddCookie(cookie *http.Cookie) *Request {
-	req.request.AddCookie(cookie)
+func (req *Request) AddCookies(cookies ...http.Cookie) *Request {
+	for _, cookie := range cookies {
+		req.request.AddCookie(&cookie)
+	}
 	return req
 }
 
