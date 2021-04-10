@@ -61,6 +61,11 @@ func (req *Request) Do() (*Response, error) {
 	}, nil
 }
 
+func (req *Request) AddCookie(cookie *http.Cookie) *Request {
+	req.request.AddCookie(cookie)
+	return req
+}
+
 func (req *Request) SetHeaders(headers map[string]string) *Request {
 	if headers != nil && req.request != nil {
 		for header, data := range headers {
