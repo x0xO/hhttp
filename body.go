@@ -12,16 +12,17 @@ import (
 )
 
 type body struct {
-	headers headers
 	body    io.ReadCloser
+	headers headers
 	stream  *bufio.Reader
-	deflate bool
+	content []byte
 	limit   int64
+	deflate bool
 }
 
 func (b *body) Stream() *bufio.Reader { return b.stream }
 
-func (b body) String() string { return string(b.Bytes()) }
+func (b *body) String() string { return string(b.Bytes()) }
 
 func (b *body) Close() error { return b.body.Close() }
 
@@ -39,6 +40,10 @@ func (b *body) UTF8() *body {
 }
 
 func (b *body) Bytes() []byte {
+	if b.content != nil {
+		return b.content
+	}
+
 	if b.stream != nil {
 		b.body = io.NopCloser(b.stream)
 	}
@@ -52,21 +57,20 @@ func (b *body) Bytes() []byte {
 		}
 	}
 
-	var bodyBytes []byte
 	if b.limit != -1 {
-		bodyBytes, err = io.ReadAll(io.LimitReader(b.body, b.limit))
+		b.content, err = io.ReadAll(io.LimitReader(b.body, b.limit))
 	} else {
-		bodyBytes, err = io.ReadAll(b.body)
+		b.content, err = io.ReadAll(b.body)
 	}
 
 	if err != nil {
 		return nil
 	}
 
-	return bodyBytes
+	return b.content
 }
 
-func (b body) Contains(pattern interface{}) bool {
+func (b *body) Contains(pattern interface{}) bool {
 	switch pattern.(type) {
 	case []byte:
 		return bytes.Contains(bytes.ToLower(b.Bytes()), bytes.ToLower(pattern.([]byte)))

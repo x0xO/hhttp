@@ -44,8 +44,15 @@ func (req *Request) Do() (*Response, error) {
 	deflate := resp.Header.Get("Content-Encoding") == "deflate"
 
 	return &Response{
-		Client:        req.client,
-		Body:          &body{headers(resp.Header), resp.Body, streamReader, deflate, -1},
+		Client: req.client,
+		Body: &body{
+			body:    resp.Body,
+			headers: headers(resp.Header),
+			stream:  streamReader,
+			content: nil,
+			limit:   -1,
+			deflate: deflate,
+		},
 		ContentLength: resp.ContentLength,
 		Cookies:       resp.Cookies(),
 		Headers:       headers(resp.Header),
