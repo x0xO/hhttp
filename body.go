@@ -25,7 +25,13 @@ func (b *body) Stream() *bufio.Reader { return b.stream }
 
 func (b *body) String() string { return string(b.Bytes()) }
 
-func (b *body) Close() error { return b.body.Close() }
+func (b *body) Close() error {
+	if _, err := io.Copy(io.Discard, b.body); err != nil {
+		return err
+	}
+
+	return b.body.Close()
+}
 
 func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
 
