@@ -54,11 +54,11 @@ func (b *body) Bytes() []byte {
 		return b.content
 	}
 
+	defer b.Close()
+
 	if b.stream != nil {
 		b.body = io.NopCloser(b.stream)
 	}
-
-	defer b.Close()
 
 	var err error
 	if b.deflate {
