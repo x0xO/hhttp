@@ -18,12 +18,13 @@ type body struct {
 	content []byte
 	limit   int64
 	deflate bool
-	utf8    bool
 }
 
 func (b *body) Stream() *bufio.Reader { return b.stream }
 
 func (b *body) String() string { return string(b.Bytes()) }
+
+func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
 
 func (b *body) Close() error {
 	if _, err := io.Copy(io.Discard, b.body); err != nil {
@@ -33,20 +34,18 @@ func (b *body) Close() error {
 	return b.body.Close()
 }
 
-func (b *body) Limit(limit int64) *body { b.limit = limit; return b }
-
 func (b *body) UTF8() string {
-	utf8Reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), b.headers.Get("Content-Type"))
+	reader, err := charset.NewReader(bytes.NewReader(b.Bytes()), b.headers.Get("Content-Type"))
 	if err != nil {
 		return b.String()
 	}
 
-	utf8Content, err := io.ReadAll(utf8Reader)
+	content, err := io.ReadAll(reader)
 	if err != nil {
 		return b.String()
 	}
 
-	return string(utf8Content)
+	return string(content)
 }
 
 func (b *body) Bytes() []byte {

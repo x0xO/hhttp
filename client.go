@@ -97,7 +97,7 @@ func (c *Client) SetOptions(opt *options) *Client {
 	}
 
 	if c.opt.timeout != 0 {
-		c.cli.Timeout = time.Second * c.opt.timeout
+		c.cli.Timeout = c.opt.timeout
 	}
 
 	redirectPolicy := func(req *http.Request, via []*http.Request) error {
