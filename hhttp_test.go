@@ -12,6 +12,66 @@ import (
 	"time"
 )
 
+func TestMultipart(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseMultipartForm(32 << 20)
+
+		var buff bytes.Buffer
+		if r.FormValue("some") == "values" {
+			buff.WriteString(r.FormValue("some"))
+		}
+		w.Write(buff.Bytes())
+	}))
+	defer ts.Close()
+
+	multipartData := map[string]string{"some": "values"}
+
+	r, err := NewClient().Multipart(ts.URL, multipartData).Do()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if r.Body.String() != "values" {
+		t.Error()
+	}
+}
+
+func TestFileUpload(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseMultipartForm(32 << 20)
+
+		var buff bytes.Buffer
+		if r.FormValue("some") == "values" {
+			buff.WriteString(r.FormValue("some"))
+		}
+
+		file, _, _ := r.FormFile("file")
+		defer file.Close()
+
+		io.Copy(&buff, file)
+		w.Write(buff.Bytes())
+	}))
+	defer ts.Close()
+
+	r, err := NewClient().FileUpload(ts.URL, "file", "info.txt", "justfile").Do()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	multipartValues := map[string]string{"some": "values"}
+	r2, err := NewClient().FileUpload(ts.URL, "file", "info.txt", "multipart", multipartValues).Do()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if r.Body.String() != "justfile" || r2.Body.String() != "valuesmultipart" {
+		t.Error()
+	}
+}
+
 func TestDeflate(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buf := &bytes.Buffer{}
