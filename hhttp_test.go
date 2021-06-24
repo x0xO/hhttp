@@ -12,6 +12,28 @@ import (
 	"time"
 )
 
+func TestKeepAlive(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if len(r.Header["Connection"]) != 2 {
+			t.Error()
+			return
+		}
+		w.Write([]byte(r.Header["Connection"][1]))
+	}))
+
+	defer ts.Close()
+
+	r, err := NewClient().SetOptions(NewOptions().KeepAlive(false)).Get(ts.URL).Do()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !r.Body.Contains("close") {
+		t.Error()
+	}
+}
+
 func TestMultipart(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
