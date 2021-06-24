@@ -123,7 +123,7 @@ func TestTimeOut(t *testing.T) {
 	r, _ := NewClient().SetOptions(NewOptions().Timeout(time.Second)).Get(ts.URL).Do()
 
 	if err == nil || !r.Body.Contains("OK") {
-		t.Error("")
+		t.Error()
 	}
 }
 

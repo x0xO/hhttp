@@ -26,7 +26,12 @@ func main() {
 		}
 	}()
 
-	jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(urlsChan).Pool(20).Do() // urls chan string
+	jobs, errors := hhttp.NewClient().
+		Async.WithContext(ctx).
+		Get(urlsChan).
+		Pool(20).
+		Do() // urls chan string
+
 	/* == URLS CHAN END == */
 
 	// with context and pool worker, limit to 20 requests

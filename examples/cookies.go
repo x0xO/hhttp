@@ -14,7 +14,11 @@ func main() {
 	c1 := http.Cookie{Name: "root1", Value: "cookie1"}
 	c2 := http.Cookie{Name: "root2", Value: "cookie2"}
 
-	r, _ := hhttp.NewClient().SetOptions(hhttp.NewOptions().Session()).Get(URL).AddCookies(c1, c2).Do()
+	r, _ := hhttp.NewClient().
+		SetOptions(hhttp.NewOptions().Session()).
+		Get(URL).
+		AddCookies(c1, c2).
+		Do()
 	r.Debug()
 
 	// set cookie after first request

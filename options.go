@@ -21,11 +21,17 @@ type options struct {
 	history        bool
 	http2          bool
 	stream         bool
+	keepAlive      bool
 }
 
-func NewOptions() *options { return &options{} }
+func NewOptions() *options { return &options{keepAlive: true} }
 
-func (opt *options) BasicAuth(basicAuth interface{}) *options { opt.basicAuth = basicAuth; return opt }
+func (opt *options) BasicAuth(
+	basicAuth interface{},
+) *options {
+	opt.basicAuth = basicAuth
+	return opt
+}
 
 func (opt *options) DNS(dns string) *options { opt.dns = dns; return opt }
 
@@ -33,13 +39,25 @@ func (opt *options) DNSOverTLS() *dnsOverTLS { return &dnsOverTLS{opt: opt} }
 
 func (opt *options) Timeout(timeout time.Duration) *options { opt.timeout = timeout; return opt }
 
-func (opt *options) UserAgent(userAgent interface{}) *options { opt.userAgent = userAgent; return opt }
+func (opt *options) UserAgent(
+	userAgent interface{},
+) *options {
+	opt.userAgent = userAgent
+	return opt
+}
 
 func (opt *options) InterfaceAddr(addr string) *options { opt.interfaceAddr = addr; return opt }
 
 func (opt *options) Proxy(proxy interface{}) *options { opt.proxy = proxy; return opt }
 
 func (opt options) String() string { return fmt.Sprintf("%#v", opt) }
+
+func (opt *options) KeepAlive(enable ...bool) *options {
+	if len(enable) != 0 {
+		opt.keepAlive = enable[0]
+	}
+	return opt
+}
 
 func (opt *options) Stream(enable ...bool) *options {
 	if len(enable) != 0 {

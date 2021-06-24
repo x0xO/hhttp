@@ -71,6 +71,10 @@ func (c *Client) SetOptions(opt *options) *Client {
 		c.cli.Jar, _ = cookiejar.New(nil)
 	}
 
+	if !c.opt.keepAlive {
+		c.transport.DisableKeepAlives = true
+	}
+
 	maxRedirects := defaultRedirects
 	if c.opt.maxRedirects != 0 {
 		maxRedirects = c.opt.maxRedirects
