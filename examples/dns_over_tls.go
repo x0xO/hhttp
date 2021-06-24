@@ -16,7 +16,9 @@ func main() {
 	// opt.DNSOverTLS().Libredns()
 	opt.DNSOverTLS().Quad9()
 
-	// opt.DNSOverTLS().AddProvider("dns.provider.com", "0.0.0.0:853", "2.2.2.2:853") // custom dns provider
+	// custom dns provider
+	// opt.DNSOverTLS().
+	// 	AddProvider("dns.provider.com", "0.0.0.0:853", "2.2.2.2:853")
 
 	r, err := hhttp.NewClient().SetOptions(opt).Get("http://httpbingo.org/get").Do()
 	if err != nil {

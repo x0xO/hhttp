@@ -208,7 +208,11 @@ func (a *async) Put(URLS interface{}, data interface{}) *Requests {
 	return &Requests{jobs: jobs}
 }
 
-func (a *async) FileUpload(URLS interface{}, fieldName, filePath string, data ...interface{}) *Requests {
+func (a *async) FileUpload(
+	URLS interface{},
+	fieldName, filePath string,
+	data ...interface{},
+) *Requests {
 	jobs := make(chan *Request)
 
 	go func() {

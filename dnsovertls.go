@@ -42,7 +42,10 @@ func (dot *dnsOverTLS) AddProvider(serverName string, addresses ...string) *opti
 	return dot.opt
 }
 
-func dial(serverName string, addresses ...string) func(context.Context, string, string) (net.Conn, error) {
+func dial(
+	serverName string,
+	addresses ...string,
+) func(context.Context, string, string) (net.Conn, error) {
 	return func(ctx context.Context, network, address string) (net.Conn, error) {
 		var dialer net.Dialer
 		conn, err := dialer.DialContext(ctx, "tcp", addresses[rand.Intn(len(addresses))])

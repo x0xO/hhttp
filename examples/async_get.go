@@ -28,14 +28,19 @@ func main() {
 
 	jobs, errors := hhttp.NewClient().
 		Async.WithContext(ctx).
-		Get(urlsChan).
+		Get(urlsChan). // urls chan string
 		Pool(20).
-		Do() // urls chan string
+		Do()
 
 	/* == URLS CHAN END == */
 
 	// with context and pool worker, limit to 20 requests
-	// jobs, errors := hhttp.NewClient().Async.WithContext(ctx).Get(URLs).Pool(20).Do() // urls []string
+
+	// jobs, errors := hhttp.NewClient().
+	// 	Async.WithContext(ctx).
+	// 	Get(URLs). //urls []string
+	// 	Pool(20).
+	// 	Do()
 
 	for jobs != nil && errors != nil {
 		select {
@@ -61,20 +66,20 @@ func main() {
 	// wg.Add(2)
 	//
 	// go func() {
-	//  defer wg.Done()
-	//  for job := range jobs {
-	//      if job.Body.Contains("google") {
-	//          cancel() // stop gorutines
-	//          fmt.Println("FOUND")
-	//      }
-	//  }
+	// 	defer wg.Done()
+	// 	for job := range jobs {
+	// 		if job.Body.Contains("google") {
+	// 			cancel() // stop gorutines
+	// 			fmt.Println("FOUND")
+	// 		}
+	// 	}
 	// }()
 	//
 	// go func() {
-	//  defer wg.Done()
-	//  for err := range errors {
-	//      fmt.Println(err)
-	//  }
+	// 	defer wg.Done()
+	// 	for err := range errors {
+	// 		fmt.Println(err)
+	// 	}
 	// }()
 	//
 	// wg.Wait()

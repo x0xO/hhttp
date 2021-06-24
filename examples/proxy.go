@@ -14,9 +14,18 @@ func main() {
 	}
 
 	URL := "https://check.torproject.org/api/ip"
-	r, err := hhttp.NewClient().SetOptions(hhttp.NewOptions().Proxy("socks5://127.0.0.1:9050")).Get(URL).Do()
+
+	r, err := hhttp.NewClient().
+		SetOptions(hhttp.NewOptions().Proxy("socks5://127.0.0.1:9050")).
+		Get(URL).
+		Do()
+
 	// for random select proxy from slice
-	// r, err := hhttp.NewClient().SetOptions(hhttp.NewOptions().Proxy([]string{"socks5://127.0.0.1:9050", "socks5://127.0.0.1:9050"})).Get(URL).Do()
+	// r, err := hhttp.NewClient().
+	// 	SetOptions(hhttp.NewOptions().Proxy([]string{"socks5://127.0.0.1:9050", "socks5://127.0.0.1:9050"})).
+	// 	Get(URL).
+	// 	Do()
+
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -19,6 +19,7 @@ func main() {
 		Get(URL).
 		AddCookies(c1, c2).
 		Do()
+
 	r.Debug()
 
 	// set cookie after first request

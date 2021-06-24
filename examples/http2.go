@@ -8,7 +8,11 @@ import (
 )
 
 func main() {
-	r, err := hhttp.NewClient().SetOptions(hhttp.NewOptions().HTTP2()).Get("https://http2cdn.cdnsun.com").Do()
+	r, err := hhttp.NewClient().
+		SetOptions(hhttp.NewOptions().HTTP2()).
+		Get("https://http2cdn.cdnsun.com").
+		Do()
+
 	if err != nil {
 		log.Fatal(err)
 	}
