@@ -52,15 +52,15 @@ func (resp Response) Dump(filename string) error {
 	return os.WriteFile(filename, resp.Body.Bytes(), 0o644)
 }
 
-type debuger string
+type printer string
 
-func (resp Response) Debug(verbos ...bool) debuger {
+func (resp Response) Debug(verbos ...bool) printer {
 
 	var builder strings.Builder
 
 	body, err := httputil.DumpRequestOut(resp.request, false)
 	if err != nil {
-		return debuger(builder.String() + "\n")
+		return printer(builder.String() + "\n")
 	}
 
 	builder.WriteString("========= Request ==========\n")
@@ -77,7 +77,7 @@ func (resp Response) Debug(verbos ...bool) debuger {
 	builder.WriteString("========= Response =========\n")
 	body, err = httputil.DumpResponse(resp.response, false)
 	if err != nil {
-		return debuger(builder.String() + "\n")
+		return printer(builder.String() + "\n")
 	}
 
 	builder.WriteString(strings.TrimSpace(string(body)))
@@ -88,9 +88,9 @@ func (resp Response) Debug(verbos ...bool) debuger {
 		builder.WriteString(resp.Body.String())
 	}
 
-	return debuger(builder.String() + "\n")
+	return printer(builder.String() + "\n")
 }
 
-func (d debuger) Print() {
-	fmt.Println(d)
+func (p printer) Print() {
+	fmt.Println(p)
 }
