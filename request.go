@@ -131,7 +131,6 @@ func (req *Request) acceptOptions() error {
 	}
 
 	req.request.Header.Set("User-Agent", userAgent)
-	req.request.Header.Add("Connection", "keep-alive")
 
 	return nil
 }

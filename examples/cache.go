@@ -15,5 +15,5 @@ func main() {
 		Do()
 
 	fmt.Println(r.StatusCode)
-	r.Debug()
+	r.Debug().Print()
 }

@@ -13,8 +13,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	r.Debug()     // without body
-	r.Debug(true) // with body
+	r.Debug().Print()     // without body
+	r.Debug(true).Print() // with body
 
 	fmt.Println(r.Time)
 }

@@ -20,13 +20,13 @@ func main() {
 		AddCookies(c1, c2).
 		Do()
 
-	r.Debug()
+	r.Debug().Print()
 
 	// set cookie after first request
 	r.SetCookies(URL, []*http.Cookie{{Name: "root", Value: "cookie"}})
 
 	r, _ = r.Get(URL).Do()
-	r.Debug()
+	r.Debug().Print()
 
 	fmt.Println(r.GetCookies(URL)) // request url cookies
 	fmt.Println(r.Cookies)

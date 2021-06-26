@@ -13,9 +13,12 @@ import (
 )
 
 func TestKeepAlive(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(fmt.Sprint(r.Header["Connection"])))
-	}))
+	ts := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte(fmt.Sprint(r.Header["Connection"])))
+		}),
+	)
+
 	defer ts.Close()
 
 	r, err := NewClient().SetOptions(NewOptions().KeepAlive(false)).Get(ts.URL).Do()

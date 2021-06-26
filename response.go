@@ -52,33 +52,45 @@ func (resp Response) Dump(filename string) error {
 	return os.WriteFile(filename, resp.Body.Bytes(), 0o644)
 }
 
-func (resp Response) Debug(verbos ...bool) {
+type debuger string
+
+func (resp Response) Debug(verbos ...bool) debuger {
+
+	var builder strings.Builder
+
 	body, err := httputil.DumpRequestOut(resp.request, false)
 	if err != nil {
-		return
+		return debuger(builder.String() + "\n")
 	}
 
-	fmt.Println("========= Request ==========")
-	fmt.Println(strings.TrimSpace(string(body)))
+	builder.WriteString("========= Request ==========\n")
+	builder.WriteString(strings.TrimSpace(string(body)) + "\n")
 
 	cookies := resp.getCookies(resp.request.URL.String())
 	if len(cookies) != 0 {
-		fmt.Println("\nCookies:")
+		builder.WriteString("\nCookies:\n")
 		for _, cookie := range cookies {
-			fmt.Println(cookie)
+			builder.WriteString(fmt.Sprint(cookie) + "\n")
 		}
 	}
 
-	fmt.Println("========= Response =========")
+	builder.WriteString("========= Response =========\n")
 	body, err = httputil.DumpResponse(resp.response, false)
 	if err != nil {
-		return
+		return debuger(builder.String() + "\n")
 	}
 
-	fmt.Println(strings.TrimSpace(string(body)))
-	fmt.Println("============================")
+	builder.WriteString(strings.TrimSpace(string(body)))
+	builder.WriteString("\n============================\n")
 
 	if len(verbos) != 0 && verbos[0] {
-		fmt.Println(resp.Body)
+		builder.WriteString("=========== Body ===========\n")
+		builder.WriteString(resp.Body.String())
 	}
+
+	return debuger(builder.String() + "\n")
+}
+
+func (d debuger) Print() {
+	fmt.Println(d)
 }
