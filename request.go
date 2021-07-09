@@ -28,6 +28,25 @@ func (req *Request) Do() (*Response, error) {
 	start := time.Now()
 
 	resp, err := req.client.cli.Do(req.request)
+
+	var attempts int
+	if err != nil ||
+		resp.StatusCode == http.StatusInternalServerError ||
+		resp.StatusCode == http.StatusTooManyRequests {
+		if req.client.opt != nil && req.client.opt.retry != 0 {
+			for i := 0; i < req.client.opt.retry; i++ {
+				time.Sleep(time.Millisecond * 50)
+				attempts++
+				resp, err = req.client.cli.Do(req.request)
+				if err == nil &&
+					resp.StatusCode != http.StatusInternalServerError &&
+					resp.StatusCode != http.StatusTooManyRequests {
+					break
+				}
+			}
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +84,7 @@ func (req *Request) Do() (*Response, error) {
 		UserAgent:     req.request.UserAgent(),
 		request:       req.request,
 		response:      resp,
+		Attempts:      attempts,
 	}, nil
 }
 

@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	var URLs []string
 	for i := 0; i < 100; i++ {
 		URLs = append(URLs, "https://httpbingo.org/get")

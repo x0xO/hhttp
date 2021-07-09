@@ -24,9 +24,9 @@ func main() {
 	// splited session
 	cli := hhttp.NewClient().SetOptions(opt)
 
-	cli.Get(URL + "/set?name1=value1&name2=value2").Do()
-	r.Body.Close()
+	s, _ := cli.Get(URL + "/set?name1=value1&name2=value2").Do()
+	s.Body.Close()
 
-	s, _ := cli.Get(URL).Do()
+	s, _ = cli.Get(URL).Do()
 	fmt.Println(s.Body) // check if cookies in response {"name1":"value1","name2":"value2"}
 }

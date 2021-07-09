@@ -22,6 +22,7 @@ type options struct {
 	http2          bool
 	stream         bool
 	keepAlive      bool
+	retry          int
 }
 
 func NewOptions() *options { return &options{keepAlive: true} }
@@ -56,6 +57,11 @@ func (opt *options) KeepAlive(enable ...bool) *options {
 	if len(enable) != 0 {
 		opt.keepAlive = enable[0]
 	}
+	return opt
+}
+
+func (opt *options) Retry(retry int) *options {
+	opt.retry = retry
 	return opt
 }
 

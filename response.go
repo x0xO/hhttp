@@ -14,10 +14,10 @@ import (
 )
 
 type Response struct {
-	Headers headers
-	request *http.Request
-	URL     *url.URL
 	*Client
+	Headers       headers
+	request       *http.Request
+	URL           *url.URL
 	response      *http.Response
 	UserAgent     string
 	Proto         string
@@ -28,6 +28,7 @@ type Response struct {
 	StatusCode    int
 	Time          time.Duration
 	ContentLength int64
+	Attempts      int
 }
 
 func (resp Response) Referer() string { return resp.response.Request.Referer() }
