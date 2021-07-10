@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -29,18 +30,34 @@ func (req *Request) Do() (*Response, error) {
 
 	resp, err := req.client.cli.Do(req.request)
 
+	// retry
 	var attempts int
+
 	if err != nil ||
 		resp.StatusCode == http.StatusInternalServerError ||
-		resp.StatusCode == http.StatusTooManyRequests {
-		if req.client.opt != nil && req.client.opt.retry != 0 {
-			for i := 0; i < req.client.opt.retry; i++ {
-				time.Sleep(time.Millisecond * 50)
+		resp.StatusCode == http.StatusTooManyRequests ||
+		resp.StatusCode == http.StatusServiceUnavailable {
+		if req.client.opt != nil && req.client.opt.retryMax != 0 {
+			for i := 0; i < req.client.opt.retryMax; i++ {
 				attempts++
+				retryWait := req.client.opt.retryWait
+				if resp != nil {
+					if s, ok := resp.Header["Retry-After"]; ok {
+						if retryAfter, err := strconv.ParseInt(s[0], 10, 64); err == nil {
+							retryWait = time.Duration(retryAfter) * time.Second
+							if retryAfter > int64(120) {
+								retryWait = time.Duration(120) * time.Second
+							}
+						}
+					}
+				}
+
+				time.Sleep(retryWait)
 				resp, err = req.client.cli.Do(req.request)
 				if err == nil &&
 					resp.StatusCode != http.StatusInternalServerError &&
-					resp.StatusCode != http.StatusTooManyRequests {
+					resp.StatusCode != http.StatusTooManyRequests &&
+					resp.StatusCode != http.StatusServiceUnavailable {
 					break
 				}
 			}

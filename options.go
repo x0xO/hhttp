@@ -22,7 +22,8 @@ type options struct {
 	http2          bool
 	stream         bool
 	keepAlive      bool
-	retry          int
+	retryMax       int
+	retryWait      time.Duration
 }
 
 func NewOptions() *options { return &options{keepAlive: true} }
@@ -60,8 +61,12 @@ func (opt *options) KeepAlive(enable ...bool) *options {
 	return opt
 }
 
-func (opt *options) Retry(retry int) *options {
-	opt.retry = retry
+func (opt *options) Retry(retryMax int, retryWait ...time.Duration) *options {
+	opt.retryWait = time.Second * 1
+	if len(retryWait) != 0 {
+		opt.retryWait = retryWait[0]
+	}
+	opt.retryMax = retryMax
 	return opt
 }
 
