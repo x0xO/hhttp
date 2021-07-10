@@ -62,11 +62,12 @@ func (opt *options) KeepAlive(enable ...bool) *options {
 }
 
 func (opt *options) Retry(retryMax int, retryWait ...time.Duration) *options {
-	opt.retryWait = time.Second * 1
+	opt.retryMax = retryMax
 	if len(retryWait) != 0 {
 		opt.retryWait = retryWait[0]
+	} else {
+		opt.retryWait = time.Second * 1
 	}
-	opt.retryMax = retryMax
 	return opt
 }
 
