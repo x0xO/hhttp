@@ -11,9 +11,10 @@ import (
 )
 
 type Request struct {
-	request *http.Request
-	client  *Client
-	error   error
+	request  *http.Request
+	client   *Client
+	writeErr *error
+	error    error
 }
 
 func (req *Request) Do() (*Response, error) {
@@ -35,6 +36,7 @@ func (req *Request) Do() (*Response, error) {
 
 	for {
 		resp, err = req.client.cli.Do(req.request)
+
 		if err == nil &&
 			resp.StatusCode != http.StatusInternalServerError &&
 			resp.StatusCode != http.StatusTooManyRequests &&
@@ -56,6 +58,10 @@ func (req *Request) Do() (*Response, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if req.writeErr != nil && (*req.writeErr).Error() != "" {
+		return nil, *req.writeErr
 	}
 
 	elapsed := time.Since(start)

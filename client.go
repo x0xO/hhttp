@@ -1,6 +1,7 @@
 package hhttp
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/tls"
@@ -18,6 +19,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/net/http2"
@@ -171,43 +173,48 @@ func (c *Client) FileUpload(URL, fieldName, filePath string, data ...interface{}
 	}
 
 	if reader == nil {
-		file, err := os.ReadFile(filePath)
+		file, err := os.Open(filePath)
 		if err != nil {
 			return &Request{error: err}
 		}
-		reader = bytes.NewReader(file)
+		reader = bufio.NewReader(file)
+		defer file.Close()
 	}
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+	bodyReader, bodyWriter := io.Pipe()
+	formWriter := multipart.NewWriter(bodyWriter)
 
-	part, err := writer.CreateFormFile(fieldName, filepath.Base(filePath))
-	if err != nil {
-		return &Request{error: err}
-	}
+	var errOnce sync.Once
+	writeErr := errors.New("")
 
-	if _, err := io.Copy(part, reader); err != nil {
-		return &Request{error: err}
-	}
-
-	if multipartValues != nil {
-		for field, value := range multipartValues {
-			writer.WriteField(field, value)
+	setWriteErr := func(err error) {
+		if err != nil {
+			errOnce.Do(func() { writeErr = err })
 		}
 	}
 
-	if err := writer.Close(); err != nil {
-		return &Request{error: err}
-	}
+	go func() {
+		partWriter, err := formWriter.CreateFormFile(fieldName, filepath.Base(filePath))
+		setWriteErr(err)
+		_, err = io.Copy(partWriter, reader)
+		setWriteErr(err)
+		if multipartValues != nil {
+			for field, value := range multipartValues {
+				formWriter.WriteField(field, value)
+			}
+		}
+		setWriteErr(formWriter.Close())
+		setWriteErr(bodyWriter.Close())
+	}()
 
-	req, err := http.NewRequest(http.MethodPost, URL, body)
+	req, err := http.NewRequest(http.MethodPost, URL, bodyReader)
 	if err != nil {
 		return &Request{error: err}
 	}
 
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", formWriter.FormDataContentType())
 
-	return &Request{request: req, client: c}
+	return &Request{request: req, client: c, writeErr: &writeErr}
 }
 
 func (c *Client) Multipart(URL string, multipartValues map[string]string) *Request {
