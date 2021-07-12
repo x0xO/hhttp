@@ -62,6 +62,10 @@ func NewClient() *Client {
 	return &c
 }
 
+func (c *Client) GetTransport() *http.Transport {
+	return c.transport
+}
+
 func (c *Client) SetOptions(opt *options) *Client {
 	c.opt = opt
 
