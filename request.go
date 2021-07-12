@@ -22,10 +22,6 @@ func (req *Request) Do() (*Response, error) {
 		return nil, req.error
 	}
 
-	if err := req.acceptOptions(); err != nil {
-		return nil, err
-	}
-
 	start := time.Now()
 
 	var (
@@ -35,6 +31,10 @@ func (req *Request) Do() (*Response, error) {
 	)
 
 	for {
+		if err := req.acceptOptions(); err != nil {
+			return nil, err
+		}
+
 		resp, err = req.client.cli.Do(req.request)
 
 		if err == nil &&

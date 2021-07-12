@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	opt := hhttp.NewOptions().Retry(5)
+	opt := hhttp.NewOptions().Retry(10)
 	// opt := hhttp.NewOptions().Retry(3, time.Millisecond*50)
 	r, err := hhttp.NewClient().SetOptions(opt).Get("http://httpbingo.org/unstable").Do()
 	if err != nil {

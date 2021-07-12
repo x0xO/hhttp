@@ -11,10 +11,10 @@ func main() {
 	// transport custom settings
 	cli := hhttp.NewClient()
 
-	cli.GetTransport().TLSHandshakeTimeout = time.Nanosecond
+	// cli.GetTransport().TLSHandshakeTimeout = time.Nanosecond
 
-	// tr := cli.GetTransport()
-	// tr.TLSHandshakeTimeout = time.Nanosecond
+	tr := cli.GetTransport()
+	tr.TLSHandshakeTimeout = time.Nanosecond
 
 	_, err := cli.Get("https://google.com").Do()
 	if err != nil {
