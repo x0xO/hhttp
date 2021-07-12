@@ -86,6 +86,10 @@ func (c *Client) SetOptions(opt *options) *Client {
 		maxRedirects = c.opt.maxRedirects
 	}
 
+	if c.opt.ja3DialTLS != nil {
+		c.transport.DialTLS = c.opt.ja3DialTLS
+	}
+
 	if c.opt.dotResolver != nil {
 		c.dialer.Resolver = c.opt.dotResolver
 	}

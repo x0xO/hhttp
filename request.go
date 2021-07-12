@@ -147,7 +147,7 @@ func (req *Request) acceptOptions() error {
 			}
 		}
 
-		if req.client.opt.proxy != nil {
+		if req.client.opt.proxy != nil && req.client.opt.ja3DialTLS == nil {
 			var proxy string
 
 			switch req.client.opt.proxy.(type) {

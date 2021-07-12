@@ -8,22 +8,23 @@ import (
 )
 
 type options struct {
-	basicAuth      interface{}
 	proxy          interface{}
 	userAgent      interface{}
+	basicAuth      interface{}
 	dotResolver    *net.Resolver
 	redirectPolicy func(*http.Request, []*http.Request) error
-	interfaceAddr  string
+	ja3DialTLS     func(network, addr string) (net.Conn, error)
 	dns            string
-	timeout        time.Duration
+	interfaceAddr  string
+	retryMax       int
 	maxRedirects   int
-	session        bool
+	timeout        time.Duration
+	retryWait      time.Duration
 	history        bool
 	http2          bool
 	stream         bool
 	keepAlive      bool
-	retryMax       int
-	retryWait      time.Duration
+	session        bool
 }
 
 func NewOptions() *options { return &options{keepAlive: true} }
@@ -31,6 +32,8 @@ func NewOptions() *options { return &options{keepAlive: true} }
 func (opt *options) DNS(dns string) *options { opt.dns = dns; return opt }
 
 func (opt *options) DNSOverTLS() *dnsOverTLS { return &dnsOverTLS{opt: opt} }
+
+func (opt *options) TLSFingerprint() *tlsFingerprint { return &tlsFingerprint{opt: opt} }
 
 func (opt *options) Timeout(timeout time.Duration) *options { opt.timeout = timeout; return opt }
 
