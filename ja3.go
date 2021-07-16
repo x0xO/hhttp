@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/magisterquis/connectproxy"
 	tls "github.com/refraction-networking/utls"
 	"golang.org/x/net/proxy"
 )
@@ -36,7 +37,6 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 
 		if tf.opt.proxy != nil {
 			var tfProxy string
-
 			switch tf.opt.proxy.(type) {
 			case string:
 				tfProxy = tf.opt.proxy.(string)
@@ -44,22 +44,27 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 				tfProxy = tf.opt.proxy.([]string)[rand.Intn(len(tf.opt.proxy.([]string)))]
 			}
 
-			if proxyURL, err := url.Parse(tfProxy); err == nil && proxyURL.Scheme != "" {
-				switch proxyURL.Scheme {
-				case "socks5", "socks5h":
-					dialer, err := proxy.FromURL(proxyURL, nil)
-					if err != nil {
-						return nil, err
-					}
-					dialConn, err = dialer.Dial(network, addr)
-					if err != nil {
-						return nil, err
-					}
-				default:
-					return nil, errors.New(
-						"proxy: unknown scheme: " + proxyURL.Scheme + ", please use socks5 or socks5h proxy",
-					)
-				}
+			proxyURL, err := url.Parse(tfProxy)
+			if err != nil {
+				return nil, err
+			}
+
+			var dialer proxy.Dialer
+			switch proxyURL.Scheme {
+			case "socks5", "socks5h":
+				dialer, err = proxy.FromURL(proxyURL, proxy.Direct)
+			case "http", "https":
+				dialer, err = connectproxy.New(proxyURL, proxy.Direct)
+			default:
+				return nil, errors.New("proxy: unknown scheme: " + proxyURL.Scheme)
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			dialConn, err = dialer.Dial(network, addr)
+			if err != nil {
+				return nil, err
 			}
 		} else {
 			dialConn, err = net.Dial(network, addr)

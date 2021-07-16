@@ -15,7 +15,9 @@ func main() {
 		UserAgent string `json:"User-Agent"`
 	}
 
-	opt := hhttp.NewOptions().Proxy("socks5://127.0.0.1:9050")
+	opt := hhttp.NewOptions()
+	// opt := hhttp.NewOptions().Proxy("socks5://127.0.0.1:9050")
+	// opt := hhttp.NewOptions().Proxy("http://127.0.0.1:18080")
 
 	opt.TLSFingerprint().
 		JA3("771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-21,29-22-24,0").
