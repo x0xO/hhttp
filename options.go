@@ -8,23 +8,24 @@ import (
 )
 
 type options struct {
+	basicAuth      interface{}
 	proxy          interface{}
 	userAgent      interface{}
-	basicAuth      interface{}
-	dotResolver    *net.Resolver
-	redirectPolicy func(*http.Request, []*http.Request) error
 	ja3DialTLS     func(network, addr string) (net.Conn, error)
-	dns            string
+	redirectPolicy func(*http.Request, []*http.Request) error
+	dialer         *net.Dialer
+	dotResolver    *net.Resolver
 	interfaceAddr  string
-	retryMax       int
-	maxRedirects   int
+	dns            string
 	timeout        time.Duration
+	maxRedirects   int
+	retryMax       int
 	retryWait      time.Duration
-	history        bool
-	http2          bool
-	stream         bool
 	keepAlive      bool
 	session        bool
+	stream         bool
+	http2          bool
+	history        bool
 }
 
 func NewOptions() *options { return &options{keepAlive: true} }

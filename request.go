@@ -128,7 +128,6 @@ func (req *Request) AddHeaders(headers map[string]string) *Request {
 
 func (req *Request) acceptOptions() error {
 	userAgent := defaultUserAgent
-	req.client.transport.Proxy = http.ProxyFromEnvironment
 
 	if req.client.opt != nil {
 		if req.client.opt.basicAuth != nil && req.request.Header.Get("Authorization") == "" {

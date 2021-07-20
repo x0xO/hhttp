@@ -67,7 +67,7 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 				return nil, err
 			}
 		} else {
-			dialConn, err = net.Dial(network, addr)
+			dialConn, err = tf.opt.dialer.Dial(network, addr)
 			if err != nil {
 				return nil, err
 			}

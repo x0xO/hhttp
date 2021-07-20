@@ -39,28 +39,15 @@ func NewClient() *Client {
 	c := Client{Async: &async{}}
 	c.Async.client = &c
 
-	c.dialer = &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-		DualStack: true,
-	}
-
+	c.dialer = &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second, DualStack: true}
 	c.tlsConfig = &tls.Config{InsecureSkipVerify: true}
 
-	c.transport = &http.Transport{
-		DialContext:           c.dialer.DialContext,
-		MaxIdleConns:          100,
-		MaxIdleConnsPerHost:   100, // http://tleyden.github.io/blog/2016/11/21/tuning-the-go-http-client-library-for-load-testing/
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		TLSClientConfig:       c.tlsConfig,
-	}
+	c.transport = http.DefaultTransport.(*http.Transport).Clone()
+	c.transport.DialContext = c.dialer.DialContext
+	c.transport.TLSClientConfig = c.tlsConfig
+	c.transport.MaxIdleConnsPerHost = 100
 
-	c.cli = &http.Client{
-		Transport: c.transport,
-		Timeout:   time.Second * 180,
-	}
+	c.cli = &http.Client{Transport: c.transport, Timeout: time.Second * 180}
 
 	return &c
 }
@@ -75,6 +62,7 @@ func (c *Client) GetTLSClientConfig() *tls.Config {
 
 func (c *Client) SetOptions(opt *options) *Client {
 	c.opt = opt
+	c.opt.dialer = c.dialer
 
 	if c.opt.http2 {
 		http2.ConfigureTransport(c.transport)

@@ -16,6 +16,10 @@ func main() {
 	}
 
 	opt := hhttp.NewOptions()
+
+	// opt := hhttp.NewOptions().DNS("8.8.8.8:53")
+	// opt := hhttp.NewOptions().DNSOverTLS().Google()
+
 	// opt := hhttp.NewOptions().Proxy("socks5://127.0.0.1:9050")
 	// opt := hhttp.NewOptions().Proxy("http://127.0.0.1:18080")
 
