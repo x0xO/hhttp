@@ -33,7 +33,7 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 
 	return func(network, addr string) (net.Conn, error) {
 
-		var dialConn net.Conn
+		dial := tf.opt.dialer.Dial
 
 		if tf.opt.proxy != nil {
 			var tfProxy string
@@ -50,6 +50,7 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 			}
 
 			var dialer proxy.Dialer
+
 			switch proxyURL.Scheme {
 			case "socks5", "socks5h":
 				dialer, err = proxy.FromURL(proxyURL, proxy.Direct)
@@ -62,19 +63,16 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 				return nil, err
 			}
 
-			dialConn, err = dialer.Dial(network, addr)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			dialConn, err = tf.opt.dialer.Dial(network, addr)
-			if err != nil {
-				return nil, err
-			}
+			dial = dialer.Dial
+		}
+
+		conn, err := dial(network, addr)
+		if err != nil {
+			return nil, err
 		}
 
 		config.ServerName = strings.Split(addr, ":")[0]
-		uConn := utls.UClient(dialConn, config, utls.HelloCustom)
+		uConn := utls.UClient(conn, config, utls.HelloCustom)
 
 		if err := uConn.ApplyPreset(spec); err != nil {
 			return nil, err

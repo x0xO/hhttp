@@ -35,7 +35,10 @@ func main() {
 	var ja3 Ja3
 	r.JSON(&ja3)
 
+	fmt.Println(ja3.Ja3Hash == "34a0de67a0bdb5aab4df9962613cf620")
+
 	fmt.Println(ja3.Ja3Hash)
 	fmt.Println(ja3.Ja3)
 	fmt.Println(ja3.UserAgent)
+
 }
