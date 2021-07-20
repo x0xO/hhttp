@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"log"
@@ -41,7 +40,7 @@ PB0KuEzBx1LQzkE8M0MToiGLsR2iK7x1KsWqbf7+5Y2Zqm5qmOfDm+71WnmIprnU
 	rootCAs.AppendCertsFromPEM(cert)
 
 	cli := hhttp.NewClient()
-	cli.GetTransport().TLSClientConfig = &tls.Config{RootCAs: rootCAs}
+	cli.GetTLSClientConfig().RootCAs = rootCAs
 
 	r, err := cli.SetOptions(
 		hhttp.NewOptions().Proxy("http://localhost:8080").HTTP2()).

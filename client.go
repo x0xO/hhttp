@@ -31,6 +31,7 @@ type Client struct {
 	dialer    *net.Dialer
 	opt       *options
 	transport *http.Transport
+	tlsConfig *tls.Config
 	history   history
 }
 
@@ -44,6 +45,8 @@ func NewClient() *Client {
 		DualStack: true,
 	}
 
+	c.tlsConfig = &tls.Config{InsecureSkipVerify: true}
+
 	c.transport = &http.Transport{
 		DialContext:           c.dialer.DialContext,
 		MaxIdleConns:          100,
@@ -51,7 +54,7 @@ func NewClient() *Client {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:       c.tlsConfig,
 	}
 
 	c.cli = &http.Client{
@@ -64,6 +67,10 @@ func NewClient() *Client {
 
 func (c *Client) GetTransport() *http.Transport {
 	return c.transport
+}
+
+func (c *Client) GetTLSClientConfig() *tls.Config {
+	return c.tlsConfig
 }
 
 func (c *Client) SetOptions(opt *options) *Client {

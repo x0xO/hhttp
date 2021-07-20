@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/magisterquis/connectproxy"
-	tls "github.com/refraction-networking/utls"
+	utls "github.com/refraction-networking/utls"
 	"golang.org/x/net/proxy"
 )
 
@@ -29,7 +29,7 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 		return func(network, addr string) (net.Conn, error) { return nil, err }
 	}
 
-	config := &tls.Config{}
+	config := &utls.Config{}
 
 	return func(network, addr string) (net.Conn, error) {
 
@@ -74,7 +74,7 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 		}
 
 		config.ServerName = strings.Split(addr, ":")[0]
-		uConn := tls.UClient(dialConn, config, tls.HelloCustom)
+		uConn := utls.UClient(dialConn, config, utls.HelloCustom)
 
 		if err := uConn.ApplyPreset(spec); err != nil {
 			return nil, err
@@ -88,52 +88,56 @@ func (tf tlsFingerprint) ja3DialTLS(ja3 string) func(network, addr string) (net.
 	}
 }
 
-func stringToSpec(ja3 string) (*tls.ClientHelloSpec, error) {
+func stringToSpec(ja3 string) (*utls.ClientHelloSpec, error) {
 
-	var extMap = map[string]tls.TLSExtension{
-		"0": &tls.SNIExtension{},
-		"5": &tls.StatusRequestExtension{},
+	extMap := map[string]utls.TLSExtension{
+		"0": &utls.SNIExtension{},
+		"5": &utls.StatusRequestExtension{},
 		// These are applied later
 		// "10": &tls.SupportedCurvesExtension{...}
 		// "11": &tls.SupportedPointsExtension{...}
-		"13": &tls.SignatureAlgorithmsExtension{
-			SupportedSignatureAlgorithms: []tls.SignatureScheme{
-				tls.ECDSAWithP256AndSHA256,
-				tls.PSSWithSHA256,
-				tls.PKCS1WithSHA256,
-				tls.ECDSAWithP384AndSHA384,
-				tls.PSSWithSHA384,
-				tls.PKCS1WithSHA384,
-				tls.PSSWithSHA512,
-				tls.PKCS1WithSHA512,
-				tls.PKCS1WithSHA1,
+		"13": &utls.SignatureAlgorithmsExtension{
+			SupportedSignatureAlgorithms: []utls.SignatureScheme{
+				utls.ECDSAWithP256AndSHA256,
+				utls.ECDSAWithP384AndSHA384,
+				utls.ECDSAWithP521AndSHA512,
+				utls.ECDSAWithSHA1,
+				utls.PKCS1WithSHA1,
+				utls.PKCS1WithSHA256,
+				utls.PKCS1WithSHA384,
+				utls.PKCS1WithSHA512,
+				utls.PSSWithSHA256,
+				utls.PSSWithSHA384,
+				utls.PSSWithSHA512,
 			},
 		},
-		"16": &tls.ALPNExtension{
+		"16": &utls.ALPNExtension{
 			AlpnProtocols: []string{"h2", "http/1.1"},
 		},
-		"18": &tls.SCTExtension{},
-		// "21": &tls.UtlsPaddingExtension{GetPaddingLen: tls.BoringPaddingStyle},
-		"21": &tls.UtlsPaddingExtension{WillPad: true},
-		"23": &tls.UtlsExtendedMasterSecretExtension{},
-		"27": &tls.FakeCertCompressionAlgsExtension{},
-		"28": &tls.FakeRecordSizeLimitExtension{},
-		"35": &tls.SessionTicketExtension{},
-		"43": &tls.SupportedVersionsExtension{Versions: []uint16{
-			tls.GREASE_PLACEHOLDER,
-			tls.VersionTLS13,
-			tls.VersionTLS12,
-			tls.VersionTLS11,
-			tls.VersionTLS10}},
-		"44": &tls.CookieExtension{},
-		"45": &tls.PSKKeyExchangeModesExtension{
-			Modes: []uint8{
-				tls.PskModeDHE,
-			}},
-		"51":    &tls.KeyShareExtension{KeyShares: []tls.KeyShare{}},
-		"13172": &tls.NPNExtension{},
-		"65281": &tls.RenegotiationInfoExtension{
-			Renegotiation: tls.RenegotiateOnceAsClient,
+		"18": &utls.SCTExtension{},
+		"21": &utls.UtlsPaddingExtension{GetPaddingLen: utls.BoringPaddingStyle},
+		"23": &utls.UtlsExtendedMasterSecretExtension{},
+		"27": &utls.FakeCertCompressionAlgsExtension{},
+		"28": &utls.FakeRecordSizeLimitExtension{},
+		"35": &utls.SessionTicketExtension{},
+		"43": &utls.SupportedVersionsExtension{Versions: []uint16{
+			utls.GREASE_PLACEHOLDER,
+			utls.VersionTLS13,
+			utls.VersionTLS12,
+			utls.VersionTLS11,
+			utls.VersionTLS10,
+		}},
+		"44": &utls.CookieExtension{},
+		"45": &utls.PSKKeyExchangeModesExtension{Modes: []uint8{
+			utls.PskModeDHE,
+		}},
+		"51": &utls.KeyShareExtension{KeyShares: []utls.KeyShare{
+			{Group: utls.X25519},
+			{Group: utls.CurveP256},
+		}},
+		"13172": &utls.NPNExtension{},
+		"65281": &utls.RenegotiationInfoExtension{
+			Renegotiation: utls.RenegotiateOnceAsClient,
 		},
 	}
 
@@ -156,15 +160,15 @@ func stringToSpec(ja3 string) (*tls.ClientHelloSpec, error) {
 	}
 
 	// parse curves
-	var targetCurves []tls.CurveID
+	var targetCurves []utls.CurveID
 	for _, c := range curves {
 		cid, err := strconv.ParseUint(c, 10, 16)
 		if err != nil {
 			return nil, err
 		}
-		targetCurves = append(targetCurves, tls.CurveID(cid))
+		targetCurves = append(targetCurves, utls.CurveID(cid))
 	}
-	extMap["10"] = &tls.SupportedCurvesExtension{Curves: targetCurves}
+	extMap["10"] = &utls.SupportedCurvesExtension{Curves: targetCurves}
 
 	// parse point formats
 	var targetPointFormats []byte
@@ -175,10 +179,10 @@ func stringToSpec(ja3 string) (*tls.ClientHelloSpec, error) {
 		}
 		targetPointFormats = append(targetPointFormats, byte(pid))
 	}
-	extMap["11"] = &tls.SupportedPointsExtension{SupportedPoints: targetPointFormats}
+	extMap["11"] = &utls.SupportedPointsExtension{SupportedPoints: targetPointFormats}
 
 	// build extenions list
-	var exts []tls.TLSExtension
+	var exts []utls.TLSExtension
 	for _, e := range extensions {
 		te, ok := extMap[e]
 		if !ok {
@@ -203,7 +207,7 @@ func stringToSpec(ja3 string) (*tls.ClientHelloSpec, error) {
 		suites = append(suites, uint16(cid))
 	}
 
-	return &tls.ClientHelloSpec{
+	return &utls.ClientHelloSpec{
 		TLSVersMin:         vid,
 		TLSVersMax:         vid,
 		CipherSuites:       suites,
